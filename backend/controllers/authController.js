@@ -45,25 +45,30 @@ const createEmployeeAccount = async (req, res) => {
     });
     await createLeaveBalance(userRecord.uid, jobMode);
     await initializeDashboardStats(userRecord.uid);
-    await sendEmail({
-      to: email,
-      subject: "Welcome to Leave Management System",
-      html: welcomeEmailTemplate({ name, email, temporaryPassword }),
-    });
-    await writeAuditLog({
-      actorId: req.user.uid,
-      action: "USER_CREATED",
-      entityType: "user",
-      entityId: userRecord.uid,
-      details: { role, department },
-    });
-    res.status(201).json({
-      success: true,
-      message: "Employee account created successfully",
-      uid: userRecord.uid,
-      temporaryPassword,
-      profile,
-    });
+    // Send success response immediately
+res.status(201).json({
+  success: true,
+  message: "Employee account created successfully",
+  uid: userRecord.uid,
+  temporaryPassword,
+  profile,
+});
+
+// Send email in the background
+sendEmail({
+  to: email,
+  subject: "Welcome to Leave Management System",
+  html: welcomeEmailTemplate({ name, email, temporaryPassword }),
+}).catch((err) => console.error("Email Error:", err));
+
+// Write audit log in the background
+writeAuditLog({
+  actorId: req.user.uid,
+  action: "USER_CREATED",
+  entityType: "user",
+  entityId: userRecord.uid,
+  details: { role, department },
+}).catch((err) => console.error("Audit Log Error:", err));
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
