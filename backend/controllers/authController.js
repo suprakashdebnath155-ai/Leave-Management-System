@@ -59,7 +59,9 @@ sendEmail({
   to: email,
   subject: "Welcome to Leave Management System",
   html: welcomeEmailTemplate({ name, email, temporaryPassword }),
-}).catch((err) => console.error("Email Error:", err));
+}).catch((err) => {
+  console.error("Email Error:", err.message);
+});
 
 // Write audit log in the background
 writeAuditLog({
@@ -68,7 +70,9 @@ writeAuditLog({
   entityType: "user",
   entityId: userRecord.uid,
   details: { role, department },
-}).catch((err) => console.error("Audit Log Error:", err));
+}).catch((err) => {
+  console.error("Audit Log Error:", err.message);
+});
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });
   }
