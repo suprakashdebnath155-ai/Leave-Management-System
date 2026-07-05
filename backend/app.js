@@ -15,7 +15,16 @@ const passwordRoutes = require("./routes/passwordRoutes");
 
 const app = express();
 
+/* ===========================================================
+   Trust Render Reverse Proxy (Required for express-rate-limit)
+=========================================================== */
+app.set("trust proxy", 1);
+
+/* ===========================================================
+   Security Middleware
+=========================================================== */
 app.use(helmet());
+
 app.use(
   cors({
     origin: process.env.FRONTEND_URL
@@ -24,40 +33,61 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json({ limit: "1mb" }));
+
+/* ===========================================================
+   Rate Limiter
+=========================================================== */
 app.use(
   "/api",
   rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100,               // Max 100 requests per IP
+    limit: 100,
     standardHeaders: "draft-8",
     legacyHeaders: false,
   })
 );
 
-app.use("/api/leaves", leaveRoutes);
-app.use("/api/users", userRoutes);
+/* ===========================================================
+   Routes
+=========================================================== */
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/leaves", leaveRoutes);
 app.use("/api/holidays", holidayRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/password", passwordRoutes);
 
+/* ===========================================================
+   Health Check
+=========================================================== */
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     success: true,
-    service: "Leave Management API",
+    service: "LeaveFlow API",
     timestamp: new Date().toISOString(),
   });
 });
 
+/* ===========================================================
+   404 Handler
+=========================================================== */
 app.use((req, res) => {
-  res.status(404).json({ success: false, message: "Route not found" });
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
 });
 
+/* ===========================================================
+   Global Error Handler
+=========================================================== */
 app.use((error, req, res, next) => {
   console.error(error);
+
   res.status(error.status || 500).json({
     success: false,
     message:
@@ -67,11 +97,14 @@ app.use((error, req, res, next) => {
   });
 });
 
+/* ===========================================================
+   Server
+=========================================================== */
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
   app.listen(PORT, () => {
-  
+    console.log(`🚀 LeaveFlow API running on port ${PORT}`);
   });
 }
 
