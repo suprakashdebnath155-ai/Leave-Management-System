@@ -8,23 +8,27 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const sendEmail = async ({
-  to,
-  subject,
-  html,
-}) => {
+const sendEmail = async ({ to, subject, html }) => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.log("Email skipped: EMAIL_USER or EMAIL_PASS is missing.");
     return { skipped: true };
   }
 
-  await transporter.sendMail({
-    from: `"Leave Management System" <${process.env.EMAIL_USER}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"Leave Management System" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html,
+    });
 
-  return { skipped: false };
+    console.log("Email sent successfully:", info.messageId);
+
+    return { skipped: false };
+  } catch (error) {
+    console.error("Email failed:", error.message);
+    throw error;
+  }
 };
 
 module.exports = {
