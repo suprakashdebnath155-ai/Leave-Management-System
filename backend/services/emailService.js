@@ -16,6 +16,7 @@ const transporter = nodemailer.createTransport({
   greetingTimeout: 60000,
   socketTimeout: 60000,
 });
+
 const sendEmail = async ({ to, subject, html }) => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log("Email skipped: EMAIL_USER or EMAIL_PASS is missing.");
@@ -32,10 +33,19 @@ const sendEmail = async ({ to, subject, html }) => {
 
     console.log("Email sent successfully:", info.messageId);
 
-    return { skipped: false };
+    return {
+      success: true,
+      skipped: false,
+    };
   } catch (error) {
     console.error("Email failed:", error.message);
-    throw error;
+
+    // Do NOT stop the application if email fails
+    return {
+      success: false,
+      skipped: false,
+      error: error.message,
+    };
   }
 };
 
