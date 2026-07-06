@@ -8,48 +8,36 @@ const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
+  logger: true,
+  debug: true,
 });
 
 transporter.verify((error, success) => {
   if (error) {
-    console.error("SMTP Verify Error:", error);
+    console.error("SMTP VERIFY ERROR");
+    console.error(error);
   } else {
-    console.log("SMTP Server is ready.");
+    console.log("SMTP READY");
   }
 });
 
 const sendEmail = async ({ to, subject, html }) => {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log("Email skipped: EMAIL_USER or EMAIL_PASS is missing.");
-    return { skipped: true };
-  }
-
   try {
     const info = await transporter.sendMail({
-      from: `"Leave Management System" <${process.env.EMAIL_USER}>`,
+      from: `"LeaveFlow" <${process.env.EMAIL_FROM}>`,
       to,
       subject,
       html,
     });
 
-    console.log("Email sent successfully:", info.messageId);
+    console.log(info);
 
-    return {
-      success: true,
-      skipped: false,
-    };
-  } catch (error) {
-    console.error("Email failed:", error);
-
-    // Do NOT stop the application if email fails
-    return {
-      success: false,
-      skipped: false,
-      error: error.message,
-    };
+    return info;
+  } catch (err) {
+    console.error("SENDMAIL ERROR");
+    console.error(err);
+    return null;
   }
 };
 
-module.exports = {
-  sendEmail,
-};
+module.exports = { sendEmail };
