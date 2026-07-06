@@ -10,6 +10,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+transporter.verify((error, success) => {
+  if (error) {
+    console.error("SMTP Verify Error:", error);
+  } else {
+    console.log("SMTP Server is ready.");
+  }
+});
+
 const sendEmail = async ({ to, subject, html }) => {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.log("Email skipped: EMAIL_USER or EMAIL_PASS is missing.");
@@ -31,7 +39,7 @@ const sendEmail = async ({ to, subject, html }) => {
       skipped: false,
     };
   } catch (error) {
-    console.error("Email failed:", error.message);
+    console.error("Email failed:", error);
 
     // Do NOT stop the application if email fails
     return {
