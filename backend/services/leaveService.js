@@ -29,7 +29,10 @@ const getMyLeaveRequests = async (employeeId) => {
 };
 
 const getAllLeaveRequests = async (filters = {}) => {
-  const snapshot = await db.collection("leaveRequests").get();
+  const snapshot = await db
+    .collection("leaveRequests")
+    .orderBy("createdAt", "desc")
+    .get();
   let leaves = serializeDocs(snapshot);
   if (filters.employeeId) {
     leaves = leaves.filter((leave) => leave.employeeId === filters.employeeId);
@@ -49,14 +52,10 @@ const getAllLeaveRequests = async (filters = {}) => {
   if (filters.endDate) {
     leaves = leaves.filter((leave) => leave.startDate <= filters.endDate);
   }
-  return leaves.sort(
-    (a, b) =>
-      (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
-  );
+  return leaves;
 };
 
-const getPendingForStage = async (stage, officerId) => {
-  const leaves = await getAllLeaveRequests();
+const filterPendingForStage = (leaves, stage, officerId) => {
   const statusField = `${stage}Status`;
   const officerField =
     stage === "reporting"
@@ -76,6 +75,11 @@ const getPendingForStage = async (stage, officerId) => {
     }
     return !leave[officerField] || leave[officerField] === officerId;
   });
+};
+
+const getPendingForStage = async (stage, officerId) => {
+  const leaves = await getAllLeaveRequests();
+  return filterPendingForStage(leaves, stage, officerId);
 };
 
 const getLeaveById = async (leaveId) => {
@@ -163,6 +167,7 @@ module.exports = {
   createLeaveRequest,
   getMyLeaveRequests,
   getAllLeaveRequests,
+  filterPendingForStage,
   getPendingForStage,
   getLeaveById,
   hasOverlappingLeave,

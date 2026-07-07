@@ -1,6 +1,9 @@
 const { db } = require("../config/firebase");
 const { getEmployeeDashboard } = require("../services/dashboardService");
-const { getAllLeaveRequests, getPendingForStage } = require("../services/leaveService");
+const {
+  filterPendingForStage,
+  getAllLeaveRequests,
+} = require("../services/leaveService");
 
 const employeeDashboard = async (req, res) => {
   try {
@@ -53,8 +56,8 @@ const adminDashboard = async (req, res) => {
 
 const officerDashboard = (stage) => async (req, res) => {
   try {
-    const pending = await getPendingForStage(stage, req.user.uid);
     const all = await getAllLeaveRequests();
+    const pending = filterPendingForStage(all, stage, req.user.uid);
     const reviewed = all.filter((leave) =>
       (leave.approvalHistory || []).some(
         (item) => item.stage === stage && item.officerId === req.user.uid

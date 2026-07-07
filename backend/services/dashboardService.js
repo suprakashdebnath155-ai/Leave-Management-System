@@ -3,11 +3,39 @@ const { db } = require("../config/firebase");
 const getEmployeeDashboard = async (
   employeeId
 ) => {
-  // Employee Profile
-  const profileDoc = await db
-    .collection("users")
-    .doc(employeeId)
-    .get();
+  const today = new Date()
+    .toISOString()
+    .split("T")[0];
+
+  const [profileDoc, balanceDoc, leaveSnapshot, holidaySnapshot] =
+    await Promise.all([
+      db
+        .collection("users")
+        .doc(employeeId)
+        .get(),
+      db
+        .collection("leaveBalances")
+        .doc(employeeId)
+        .get(),
+      db
+        .collection("leaveRequests")
+        .where(
+          "employeeId",
+          "==",
+          employeeId
+        )
+        .get(),
+      db
+        .collection("holidays")
+        .where(
+          "date",
+          ">=",
+          today
+        )
+        .orderBy("date")
+        .limit(5)
+        .get(),
+    ]);
 
   if (!profileDoc.exists) {
     throw new Error(
@@ -17,25 +45,9 @@ const getEmployeeDashboard = async (
 
   const profile = profileDoc.data();
 
-  // Leave Balance
-  const balanceDoc = await db
-    .collection("leaveBalances")
-    .doc(employeeId)
-    .get();
-
   const leaveBalance = balanceDoc.exists
     ? balanceDoc.data()
     : {};
-
-  // Latest 5 Leave Requests
-  const leaveSnapshot = await db
-    .collection("leaveRequests")
-    .where(
-      "employeeId",
-      "==",
-      employeeId
-    )
-    .get();
 
   const allLeaves =
     leaveSnapshot.docs.map((doc) => ({
@@ -76,23 +88,6 @@ const getEmployeeDashboard = async (
       summary.pending++;
     }
   });
-
-  // Today's Date
-  const today = new Date()
-    .toISOString()
-    .split("T")[0];
-
-  // Upcoming Holidays
-  const holidaySnapshot = await db
-    .collection("holidays")
-    .where(
-      "date",
-      ">=",
-      today
-    )
-    .orderBy("date")
-    .limit(5)
-    .get();
 
   const upcomingHolidays =
     holidaySnapshot.docs.map((doc) => ({

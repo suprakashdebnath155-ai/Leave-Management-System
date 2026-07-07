@@ -40,10 +40,17 @@ const requestPasswordReset = async (req, res) => {
       createdAt: new Date(),
     });
 
-    const resetLink =
-      `${process.env.FRONTEND_URL}/reset-password/${token}`;
+    if (!process.env.FRONTEND_URL) {
+      return res.status(500).json({
+        success: false,
+        message: "FRONTEND_URL is not configured.",
+      });
+    }
 
-    await sendEmail({
+    const resetLink =
+      `${process.env.FRONTEND_URL.replace(/\/$/, "")}/reset-password/${token}`;
+
+    const emailInfo = await sendEmail({
       to: email,
       subject: "Reset your LeaveFlow password",
       html: passwordResetEmailTemplate({
@@ -51,6 +58,13 @@ const requestPasswordReset = async (req, res) => {
         resetLink,
       }),
     });
+
+    if (!emailInfo) {
+      return res.status(503).json({
+        success: false,
+        message: "Password reset email could not be sent. Check SMTP settings.",
+      });
+    }
 
     res.json({
       success: true,

@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const compression = require("compression");
 require("dotenv").config();
 
 const authRoutes = require("./routes/authRoutes");
@@ -24,6 +25,7 @@ app.set("trust proxy", 1);
    Security Middleware
 =========================================================== */
 app.use(helmet());
+app.use(compression());
 
 app.use(
   cors({
@@ -35,6 +37,18 @@ app.use(
 );
 
 app.use(express.json({ limit: "1mb" }));
+
+/* ===========================================================
+   Health Check
+=========================================================== */
+app.get("/api/health", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.status(200).json({
+    success: true,
+    service: "LeaveFlow API",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 /* ===========================================================
    Rate Limiter
@@ -60,17 +74,6 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/password", passwordRoutes);
-
-/* ===========================================================
-   Health Check
-=========================================================== */
-app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    service: "LeaveFlow API",
-    timestamp: new Date().toISOString(),
-  });
-});
 
 /* ===========================================================
    404 Handler

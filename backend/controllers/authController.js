@@ -4,6 +4,8 @@ const { createLeaveBalance } = require("../services/leaveBalanceService");
 const {
   createFirebaseUser,
   createUserProfile,
+  clearUserProfileCache,
+  getUserProfile,
 } = require("../services/authService");
 const { initializeDashboardStats } = require("../services/dashboardStatsService");
 const { sendEmail } = require("../services/emailService");
@@ -87,15 +89,11 @@ const loginUser = (req, res) => {
 
 const getMyProfile = async (req, res) => {
   try {
-    const userDoc = await db.collection("users").doc(req.user.uid).get();
-    if (!userDoc.exists) {
-      return res.status(404).json({ success: false, message: "Profile not found" });
-    }
-    const profile = userDoc.data();
+    const profile = await getUserProfile(req.user.uid);
     if (profile.isActive === false) {
       return res.status(403).json({ success: false, message: "Account inactive" });
     }
-    res.json({ success: true, profile: { id: userDoc.id, ...profile } });
+    res.json({ success: true, profile: { id: req.user.uid, ...profile } });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -116,6 +114,7 @@ const updateMyProfile = async (req, res) => {
       ...updates,
       updatedAt: new Date(),
     });
+    clearUserProfileCache(req.user.uid);
     res.json({ success: true, message: "Profile updated successfully" });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message });

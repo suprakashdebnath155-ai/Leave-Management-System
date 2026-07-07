@@ -1,6 +1,7 @@
 const { getAuth } = require("firebase-admin/auth");
 const { db } = require("../config/firebase");
 const { writeAuditLog } = require("../services/auditService");
+const { clearUserProfileCache } = require("../services/authService");
 
 const ALLOWED_ROLES = [
   "admin",
@@ -59,6 +60,7 @@ const updateUser = async (req, res) => {
       ...updates,
       updatedAt: new Date(),
     });
+    clearUserProfileCache(req.params.id);
     await writeAuditLog({
       actorId: req.user.uid,
       action: "USER_UPDATED",
@@ -86,6 +88,7 @@ const setUserStatus = async (req, res) => {
       isActive,
       updatedAt: new Date(),
     });
+    clearUserProfileCache(req.params.id);
     await writeAuditLog({
       actorId: req.user.uid,
       action: isActive ? "USER_ACTIVATED" : "USER_DEACTIVATED",
@@ -135,6 +138,7 @@ const deleteUser = async (req, res) => {
     batch.delete(db.collection("leaveBalances").doc(req.params.id));
     batch.delete(db.collection("dashboardStats").doc(req.params.id));
     await batch.commit();
+    clearUserProfileCache(req.params.id);
     await writeAuditLog({
       actorId: req.user.uid,
       action: "USER_DELETED",

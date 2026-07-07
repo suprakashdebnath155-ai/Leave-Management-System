@@ -1,43 +1,50 @@
-const nodemailer = require("nodemailer");
+const SibApiV3Sdk = require("@getbrevo/brevo");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  logger: true,
-  debug: true,
-});
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-transporter.verify((error, success) => {
-  if (error) {
-    console.error("SMTP VERIFY ERROR");
-    console.error(error);
-  } else {
-    console.log("SMTP READY");
-  }
-});
+apiInstance.setApiKey(
+  SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
 
 const sendEmail = async ({ to, subject, html }) => {
+  if (!process.env.BREVO_API_KEY) {
+    console.log("BREVO_API_KEY is missing.");
+    return { skipped: true };
+  }
+
   try {
-    const info = await transporter.sendMail({
-      from: `"LeaveFlow" <${process.env.EMAIL_FROM}>`,
-      to,
+    const sendSmtpEmail = {
+      sender: {
+        name: "Leave Management System",
+        email: process.env.EMAIL_FROM,
+      },
+      to: [
+        {
+          email: to,
+        },
+      ],
       subject,
-      html,
-    });
+      htmlContent: html,
+    };
 
-    console.log(info);
+    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
 
-    return info;
-  } catch (err) {
-    console.error("SENDMAIL ERROR");
-    console.error(err);
-    return null;
+    console.log("Email sent successfully.", result);
+
+    return {
+      success: true,
+    };
+  } catch (error) {
+    console.error("Brevo API Error:", error);
+
+    return {
+      success: false,
+      error: error.message,
+    };
   }
 };
 
-module.exports = { sendEmail };
+module.exports = {
+  sendEmail,
+};

@@ -23,7 +23,20 @@ firebase deploy --only hosting
 
 ## Backend
 
-`render.yaml` provides a Render blueprint. Set `FRONTEND_URL`, `FIREBASE_SERVICE_ACCOUNT_JSON`, and optional email secrets. The health check is `/api/health`.
+`render.yaml` provides a Render blueprint. Set `FRONTEND_URL`, `FIREBASE_SERVICE_ACCOUNT_JSON`, and the email secrets if notifications or password reset emails are required. The health check is `/api/health`.
+
+Required email variables for Render:
+
+- `EMAIL_USER`: SMTP username from your provider.
+- `EMAIL_PASS`: SMTP password or SMTP API key.
+- `EMAIL_FROM`: verified sender email address, for example `noreply@yourdomain.com`.
+
+Optional email variables:
+
+- `EMAIL_HOST`: defaults to `smtp-relay.brevo.com`.
+- `EMAIL_PORT`: defaults to `587`.
+- `EMAIL_SECURE`: use `false` for port `587`, `true` for port `465`.
+- `EMAIL_DEBUG`: set to `true` only while troubleshooting.
 
 ## Final production checks
 

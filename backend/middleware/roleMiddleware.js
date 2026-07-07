@@ -1,21 +1,8 @@
 const authorizeRoles = (...roles) => {
   return async (req, res, next) => {
     try {
-      const { db } = require("../config/firebase");
-
-      const userDoc = await db
-        .collection("users")
-        .doc(req.user.uid)
-        .get();
-
-      if (!userDoc.exists) {
-        return res.status(404).json({
-          success: false,
-          message: "User profile not found",
-        });
-      }
-
-      const user = userDoc.data();
+      const { getUserProfile } = require("../services/authService");
+      const user = await getUserProfile(req.user.uid);
 
       if (user.isActive === false) {
         return res.status(403).json({
@@ -35,6 +22,13 @@ const authorizeRoles = (...roles) => {
 
       next();
     } catch (error) {
+      if (error.message === "User not found") {
+        return res.status(404).json({
+          success: false,
+          message: "User profile not found",
+        });
+      }
+
       res.status(500).json({
         success: false,
         error: error.message,
