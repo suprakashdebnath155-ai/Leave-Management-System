@@ -1,12 +1,3 @@
-const SibApiV3Sdk = require("@getbrevo/brevo");
-
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
-apiInstance.setApiKey(
-  SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
-  process.env.BREVO_API_KEY
-);
-
 const sendEmail = async ({ to, subject, html }) => {
   if (!process.env.BREVO_API_KEY) {
     console.log("BREVO_API_KEY is missing.");
@@ -14,29 +5,47 @@ const sendEmail = async ({ to, subject, html }) => {
   }
 
   try {
-    const sendSmtpEmail = {
-      sender: {
-        name: "Leave Management System",
-        email: process.env.EMAIL_FROM,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "api-key": process.env.BREVO_API_KEY,
       },
-      to: [
-        {
-          email: to,
+      body: JSON.stringify({
+        sender: {
+          name: "Leave Management System",
+          email: process.env.EMAIL_FROM,
         },
-      ],
-      subject,
-      htmlContent: html,
-    };
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject,
+        htmlContent: html,
+      }),
+    });
 
-    const result = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const result = await response.json();
 
-    console.log("Email sent successfully.", result);
+    if (!response.ok) {
+      console.error("Brevo API Error:", result);
+
+      return {
+        success: false,
+        error: result,
+      };
+    }
+
+    console.log("Email sent successfully:", result);
 
     return {
       success: true,
+      data: result,
     };
   } catch (error) {
-    console.error("Brevo API Error:", error);
+    console.error("Brevo Fetch Error:", error);
 
     return {
       success: false,
