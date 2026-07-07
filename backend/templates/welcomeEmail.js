@@ -113,7 +113,7 @@ text-align:center;
 ">
 
 <a
-href="http://localhost:5173/login"
+href="${process.env.FRONTEND_URL}/login"
 style="
 background:#0d6efd;
 color:white;
