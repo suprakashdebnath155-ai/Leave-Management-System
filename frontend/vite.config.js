@@ -7,6 +7,13 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    strictPort: true,
+  },
+
   build: {
     sourcemap: false,
     rollupOptions: {
@@ -15,6 +22,7 @@ export default defineConfig({
           if (id.includes("node_modules/firebase")) {
             return "firebase";
           }
+
           if (
             id.includes("node_modules/react") ||
             id.includes("node_modules/react-dom") ||

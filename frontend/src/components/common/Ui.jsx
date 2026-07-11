@@ -36,11 +36,26 @@ export function EmptyState({ icon = "◎", title, description, action }) {
 }
 
 export function ErrorState({ message, retry }) {
+  const handleRetry = () => {
+    if (typeof retry === "function") {
+      retry();
+    }
+  };
+
   return (
     <div className="error-state">
       <strong>We hit a snag.</strong>
       <p>{message}</p>
-      {retry && <button className="button secondary" onClick={retry}>Try again</button>}
+
+      {retry && (
+        <button
+          type="button"
+          className="button secondary"
+          onClick={handleRetry}
+        >
+          Try again
+        </button>
+      )}
     </div>
   );
 }

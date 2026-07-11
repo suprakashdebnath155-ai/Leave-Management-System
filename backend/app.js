@@ -13,6 +13,9 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const reportRoutes = require("./routes/reportRoutes");
 const passwordRoutes = require("./routes/passwordRoutes");
+const {
+  startLeaveRevocationJob,
+} = require("./jobs/leaveRevocationJob");
 
 const app = express();
 
@@ -27,12 +30,43 @@ app.set("trust proxy", 1);
 app.use(helmet());
 app.use(compression());
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+];
+
+if (process.env.FRONTEND_URL) {
+  process.env.FRONTEND_URL
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .forEach((origin) => {
+      if (!allowedOrigins.includes(origin)) {
+        allowedOrigins.push(origin);
+      }
+    });
+}
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL
-      ? process.env.FRONTEND_URL.split(",").map((origin) => origin.trim())
-      : true,
+    origin: (origin, callback) => {
+      // Allow requests without an Origin header,
+      // such as Postman, curl, or server-to-server requests.
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      console.error("CORS blocked origin:", origin);
+
+      return callback(new Error(`CORS blocked origin: ${origin}`));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
@@ -108,6 +142,8 @@ const PORT = process.env.PORT || 5000;
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`🚀 LeaveFlow API running on port ${PORT}`);
+
+    startLeaveRevocationJob();
   });
 }
 

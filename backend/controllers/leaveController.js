@@ -18,7 +18,10 @@ const {
   hasOverlappingLeave,
   recordDecision,
   cancelLeaveRequest,
+  clearAllLeaveRequests,
+  revokeExpiredLeaveRequests,
 } = require("../services/leaveService");
+
 const { updateDashboardStats } = require("../services/dashboardStatsService");
 const { writeAuditLog } = require("../services/auditService");
 const { runBackgroundTask } = require("../utils/backgroundTask");
@@ -378,6 +381,150 @@ const getLeaveDetails = async (req, res) => {
   }
 };
 
+const clearAllLeaves = async (req, res) => {
+  try {
+    const result = await clearAllLeaveRequests();
+
+    await writeAuditLog({
+      actorId: req.user.uid,
+      action: "ALL_LEAVE_REQUESTS_DELETED",
+      entityType: "leave",
+      entityId: "all-leave-requests",
+      details: {
+        deletedCount: result.deletedCount,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        result.deletedCount === 0
+          ? "No leave requests found to delete."
+          : `${result.deletedCount} leave request(s) deleted successfully.`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Clear all leave requests error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const revokeExpiredLeaves = async (req, res) => {
+  try {
+    const result = await revokeExpiredLeaveRequests();
+
+    if (result.revokedCount > 0) {
+      runBackgroundTask("Expired leave revocation side effects", async () => {
+        for (const leave of result.revokedLeaves) {
+          try {
+            // Update dashboard statistics
+            await updateDashboardStats(leave.employeeId);
+
+            // Create in-app notification
+            await notify({
+              userId: leave.employeeId,
+              title: "Leave request automatically revoked",
+              message: `Your ${leave.leaveType} request was automatically revoked after remaining pending for more than 3 working days.`,
+              type: "warning",
+            });
+
+            // Get employee details for email
+            const employee = await getUserProfile(leave.employeeId);
+
+            // Send email notification
+            await sendEmail({
+              to: employee.email,
+              subject: "Leave Request Automatically Revoked",
+              html: `
+                <!DOCTYPE html>
+                <html>
+                  <body style="font-family: Arial, sans-serif; color: #333;">
+                    <h2>Leave Request Automatically Revoked</h2>
+
+                    <p>Dear ${employee.name},</p>
+
+                    <p>
+                      Your <strong>${leave.leaveType}</strong> leave request
+                      from <strong>${leave.startDate}</strong> to
+                      <strong>${leave.endDate}</strong> has been automatically
+                      revoked because it remained pending for more than
+                      3 working days.
+                    </p>
+
+                    <p>
+                      Saturdays, Sundays, and official holidays are not counted
+                      as working days.
+                    </p>
+
+                    <p>
+                      Please contact the concerned authority if you require
+                      further assistance.
+                    </p>
+
+                    <br>
+
+                    <p>
+                      Regards,<br>
+                      <strong>Leave Management System</strong>
+                    </p>
+                  </body>
+                </html>
+              `,
+            });
+
+            // Write audit log
+            await writeAuditLog({
+              actorId: "system",
+              action: "LEAVE_AUTO_REVOKED",
+              entityType: "leave",
+              entityId: leave.id,
+              details: {
+                employeeId: leave.employeeId,
+                leaveType: leave.leaveType,
+                elapsedWorkingDays: leave.elapsedWorkingDays,
+                reason:
+                  "Automatically revoked after remaining pending for more than 3 working days.",
+              },
+            });
+          } catch (sideEffectError) {
+            console.error(
+              `Auto-revocation side effect failed for leave ${leave.id}:`,
+              sideEffectError.message
+            );
+          }
+        }
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        result.revokedCount === 0
+          ? "No expired pending leave requests found."
+          : `${result.revokedCount} expired leave request(s) automatically revoked.`,
+      revokedCount: result.revokedCount,
+      revokedLeaves: result.revokedLeaves.map((leave) => ({
+        id: leave.id,
+        employeeId: leave.employeeId,
+        employeeName: leave.employeeName,
+        leaveType: leave.leaveType,
+        elapsedWorkingDays: leave.elapsedWorkingDays,
+      })),
+    });
+  } catch (error) {
+    console.error("Auto-revoke expired leaves error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   applyLeave,
   getMyLeaves,
@@ -392,4 +539,6 @@ module.exports = {
   getMyBalanceHistory,
   cancelMyLeave,
   getLeaveDetails,
+  clearAllLeaves,
+  revokeExpiredLeaves,
 };
