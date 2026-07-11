@@ -11,6 +11,7 @@ const FIELD_BY_TYPE = {
 const createLeaveBalance = async (employeeId, jobMode) => {
   const now = new Date();
   const isRegular = jobMode === "Regular";
+
   const balance = {
     employeeId,
     medicalLeave: 90,
@@ -23,14 +24,26 @@ const createLeaveBalance = async (employeeId, jobMode) => {
     earnedLeaveYear: now.getFullYear(),
     updatedAt: now,
   };
-  await db.collection("leaveBalances").doc(employeeId).set(balance);
+
+  await db
+    .collection("leaveBalances")
+    .doc(employeeId)
+    .set(balance);
+
   return balance;
 };
 
 const refreshAccruals = async (employeeId) => {
-  const ref = db.collection("leaveBalances").doc(employeeId);
+  const ref = db
+    .collection("leaveBalances")
+    .doc(employeeId);
+
   const doc = await ref.get();
-  if (!doc.exists) throw new Error("Leave balance not found");
+
+  if (!doc.exists) {
+    throw new Error("Leave balance not found");
+  }
+
   const balance = doc.data();
   const now = new Date();
   const updates = {};
@@ -43,13 +56,17 @@ const refreshAccruals = async (employeeId) => {
     updates.casualLeaveMonth = now.getMonth() + 1;
     updates.casualLeaveYear = now.getFullYear();
   }
+
   if (balance.earnedLeaveYear !== now.getFullYear()) {
     updates.earnedLeave = 12;
     updates.earnedLeaveYear = now.getFullYear();
   }
+
   if (Object.keys(updates).length) {
     updates.updatedAt = now;
+
     await ref.update(updates);
+
     await db.collection("balanceHistory").add({
       employeeId,
       action: "ACCRUAL_REFRESH",
@@ -57,24 +74,135 @@ const refreshAccruals = async (employeeId) => {
       createdAt: now,
     });
   }
-  return { ...balance, ...updates };
+
+  return {
+    ...balance,
+    ...updates,
+  };
 };
 
 const resetMonthlyCasualLeave = refreshAccruals;
 const resetYearlyEarnedLeave = refreshAccruals;
 
+/*
+  Returns the permanent Firestore balance.
+
+  Important:
+  This does NOT subtract pending requests.
+*/
 const getLeaveBalance = async (employeeId) => {
   await refreshAccruals(employeeId);
-  const doc = await db.collection("leaveBalances").doc(employeeId).get();
-  if (!doc.exists) throw new Error("Leave balance not found");
+
+  const doc = await db
+    .collection("leaveBalances")
+    .doc(employeeId)
+    .get();
+
+  if (!doc.exists) {
+    throw new Error("Leave balance not found");
+  }
+
   return doc.data();
 };
 
-const checkLeaveBalance = async (employeeId, leaveType, daysRequested) => {
+/*
+  Calculate all leave days currently reserved by pending requests.
+
+  Only overall status === "pending" is reserved.
+
+  Approved:
+    Already permanently deducted, so don't reserve again.
+
+  Rejected / Cancelled / Revoked:
+    No reservation.
+*/
+const getReservedLeaveDays = async (employeeId) => {
+  const snapshot = await db
+    .collection("leaveRequests")
+    .where("employeeId", "==", employeeId)
+    .get();
+
+  const reserved = {
+    casualLeaveBalance: 0,
+    medicalLeave: 0,
+    earnedLeave: 0,
+    halfPayLeave: 0,
+    dutyLeave: 0,
+  };
+
+  snapshot.docs.forEach((doc) => {
+    const leave = doc.data();
+
+    if (leave.status !== "pending") {
+      return;
+    }
+
+    const field = FIELD_BY_TYPE[leave.leaveType];
+
+    if (!field) {
+      return;
+    }
+
+    reserved[field] += Number(leave.daysRequested || 0);
+  });
+
+  return reserved;
+};
+
+/*
+  Returns the effective available balance:
+
+  available = permanent balance - pending reserved days
+*/
+const getAvailableLeaveBalance = async (employeeId) => {
+  const [actualBalance, reserved] = await Promise.all([
+    getLeaveBalance(employeeId),
+    getReservedLeaveDays(employeeId),
+  ]);
+
+  const availableBalance = {
+    ...actualBalance,
+  };
+
+  Object.values(FIELD_BY_TYPE).forEach((field) => {
+    availableBalance[field] = Math.max(
+      0,
+      Number(actualBalance[field] || 0) -
+        Number(reserved[field] || 0)
+    );
+  });
+
+  return {
+    balance: availableBalance,
+    actualBalance,
+    reserved,
+  };
+};
+
+/*
+  Check against AVAILABLE balance, not raw permanent balance.
+
+  This prevents an employee from reusing days already
+  reserved by another pending request.
+*/
+const checkLeaveBalance = async (
+  employeeId,
+  leaveType,
+  daysRequested
+) => {
   const field = FIELD_BY_TYPE[leaveType];
-  if (!field) return false;
-  const balance = await getLeaveBalance(employeeId);
-  return Number(balance[field] || 0) >= Number(daysRequested);
+
+  if (!field) {
+    return false;
+  }
+
+  const { balance } =
+    await getAvailableLeaveBalance(employeeId);
+
+  return (
+    Number(balance[field] || 0) >=
+    Number(daysRequested)
+  );
 };
 
 const changeLeaveBalance = async ({
@@ -85,29 +213,66 @@ const changeLeaveBalance = async ({
   leaveId,
 }) => {
   const field = FIELD_BY_TYPE[leaveType];
-  if (!field) throw new Error("Invalid leave type");
-  const ref = db.collection("leaveBalances").doc(employeeId);
+
+  if (!field) {
+    throw new Error("Invalid leave type");
+  }
+
+  const numericDays = Number(days);
+
+  if (!Number.isFinite(numericDays) || numericDays <= 0) {
+    throw new Error("Invalid number of leave days");
+  }
+
+  const ref = db
+    .collection("leaveBalances")
+    .doc(employeeId);
 
   await db.runTransaction(async (transaction) => {
     const doc = await transaction.get(ref);
-    if (!doc.exists) throw new Error("Leave balance not found");
-    const current = Number(doc.data()[field] || 0);
-    const next = current + direction * Number(days);
-    if (next < 0) throw new Error("Insufficient leave balance");
-    transaction.update(ref, { [field]: next, updatedAt: new Date() });
+
+    if (!doc.exists) {
+      throw new Error("Leave balance not found");
+    }
+
+    const current = Number(
+      doc.data()[field] || 0
+    );
+
+    const next =
+      current + direction * numericDays;
+
+    if (next < 0) {
+      throw new Error(
+        "Insufficient leave balance"
+      );
+    }
+
+    transaction.update(ref, {
+      [field]: next,
+      updatedAt: new Date(),
+    });
   });
 
   await db.collection("balanceHistory").add({
     employeeId,
     leaveId: leaveId || null,
     leaveType,
-    days: Number(days),
-    action: direction < 0 ? "DEDUCTED" : "RESTORED",
+    days: numericDays,
+    action:
+      direction < 0
+        ? "DEDUCTED"
+        : "RESTORED",
     createdAt: new Date(),
   });
 };
 
-const deductLeaveBalance = (employeeId, leaveType, days, leaveId) =>
+const deductLeaveBalance = (
+  employeeId,
+  leaveType,
+  days,
+  leaveId
+) =>
   changeLeaveBalance({
     employeeId,
     leaveType,
@@ -116,7 +281,12 @@ const deductLeaveBalance = (employeeId, leaveType, days, leaveId) =>
     leaveId,
   });
 
-const restoreLeaveBalance = (employeeId, leaveType, days, leaveId) =>
+const restoreLeaveBalance = (
+  employeeId,
+  leaveType,
+  days,
+  leaveId
+) =>
   changeLeaveBalance({
     employeeId,
     leaveType,
@@ -130,17 +300,24 @@ const getBalanceHistory = async (employeeId) => {
     .collection("balanceHistory")
     .where("employeeId", "==", employeeId)
     .get();
+
   return snapshot.docs
-    .map((doc) => ({ id: doc.id, ...doc.data() }))
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
     .sort(
       (a, b) =>
-        (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+        (b.createdAt?.toMillis?.() || 0) -
+        (a.createdAt?.toMillis?.() || 0)
     );
 };
 
 module.exports = {
   createLeaveBalance,
   getLeaveBalance,
+  getReservedLeaveDays,
+  getAvailableLeaveBalance,
   resetMonthlyCasualLeave,
   resetYearlyEarnedLeave,
   checkLeaveBalance,
