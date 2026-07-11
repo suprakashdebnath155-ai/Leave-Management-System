@@ -1,106 +1,248 @@
 const { db } = require("../config/firebase");
 const { getHolidayDates } = require("./holidayService");
 
+/* =========================================================
+   HELPER: SERIALIZE FIRESTORE DOCUMENTS
+========================================================= */
+
 const serializeDocs = (snapshot) =>
-  snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+
+/* =========================================================
+   CREATE LEAVE REQUEST
+========================================================= */
 
 const createLeaveRequest = async (leaveData) => {
+  const now = new Date();
+
   const docRef = await db.collection("leaveRequests").add({
     ...leaveData,
+
+    // Overall leave status
     status: "pending",
+
+    // Individual workflow stages
     reportingStatus: "pending",
     reviewingStatus: "pending",
     approvingStatus: "pending",
+
+    // Remarks
+    reportingRemark: "",
+    reviewingRemark: "",
+    approvingRemark: "",
+
+    // Complete history of decisions
     approvalHistory: [],
-    createdAt: new Date(),
-    updatedAt: new Date(),
+
+    createdAt: now,
+    updatedAt: now,
   });
+
   return docRef.id;
 };
+
+/* =========================================================
+   GET EMPLOYEE'S OWN LEAVE REQUESTS
+========================================================= */
 
 const getMyLeaveRequests = async (employeeId) => {
   const snapshot = await db
     .collection("leaveRequests")
     .where("employeeId", "==", employeeId)
     .get();
+
   return serializeDocs(snapshot).sort(
     (a, b) =>
-      (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0)
+      (b.createdAt?.toMillis?.() || 0) -
+      (a.createdAt?.toMillis?.() || 0)
   );
 };
+
+/* =========================================================
+   GET ALL LEAVE REQUESTS
+========================================================= */
 
 const getAllLeaveRequests = async (filters = {}) => {
   const snapshot = await db
     .collection("leaveRequests")
     .orderBy("createdAt", "desc")
     .get();
+
   let leaves = serializeDocs(snapshot);
+
   if (filters.employeeId) {
-    leaves = leaves.filter((leave) => leave.employeeId === filters.employeeId);
+    leaves = leaves.filter(
+      (leave) => leave.employeeId === filters.employeeId
+    );
   }
+
   if (filters.department) {
-    leaves = leaves.filter((leave) => leave.department === filters.department);
+    leaves = leaves.filter(
+      (leave) => leave.department === filters.department
+    );
   }
+
   if (filters.leaveType) {
-    leaves = leaves.filter((leave) => leave.leaveType === filters.leaveType);
+    leaves = leaves.filter(
+      (leave) => leave.leaveType === filters.leaveType
+    );
   }
+
   if (filters.status) {
-    leaves = leaves.filter((leave) => leave.status === filters.status);
+    leaves = leaves.filter(
+      (leave) => leave.status === filters.status
+    );
   }
+
   if (filters.startDate) {
-    leaves = leaves.filter((leave) => leave.endDate >= filters.startDate);
+    leaves = leaves.filter(
+      (leave) => leave.endDate >= filters.startDate
+    );
   }
+
   if (filters.endDate) {
-    leaves = leaves.filter((leave) => leave.startDate <= filters.endDate);
+    leaves = leaves.filter(
+      (leave) => leave.startDate <= filters.endDate
+    );
   }
+
   return leaves;
 };
 
+/* =========================================================
+   FILTER PENDING REQUESTS FOR EACH WORKFLOW STAGE
+========================================================= */
+
 const filterPendingForStage = (leaves, stage, officerId) => {
+  const validStages = [
+    "reporting",
+    "reviewing",
+    "approving",
+  ];
+
+  if (!validStages.includes(stage)) {
+    throw new Error(`Invalid leave workflow stage: ${stage}`);
+  }
+
   const statusField = `${stage}Status`;
+
   const officerField =
     stage === "reporting"
       ? "reportingOfficerId"
       : stage === "reviewing"
         ? "reviewingOfficerId"
         : "approvingAuthorityId";
+
   return leaves.filter((leave) => {
+    // Only globally pending requests can enter the workflow
+    if (leave.status !== "pending") {
+      return false;
+    }
+
+    // This particular stage must still be pending
+    if (leave[statusField] !== "pending") {
+      return false;
+    }
+
+    // Reviewing Officer can see the request only after
+    // Reporting Officer recommends it
     if (
-  ["cancelled", "rejected", "approved", "revoked"].includes(leave.status) ||
-  leave[statusField] !== "pending"
-) {
-  return false;
-}
-    if (stage === "reviewing" && leave.reportingStatus !== "recommended") {
+      stage === "reviewing" &&
+      leave.reportingStatus !== "recommended"
+    ) {
       return false;
     }
-    if (stage === "approving" && leave.reviewingStatus !== "recommended") {
+
+    // Approving Authority can see the request only after
+    // Reviewing Officer recommends it
+    if (
+      stage === "approving" &&
+      leave.reviewingStatus !== "recommended"
+    ) {
       return false;
     }
-    return !leave[officerField] || leave[officerField] === officerId;
+
+    // If a particular officer is assigned, only that officer
+    // can see and process the request
+    return (
+      !leave[officerField] ||
+      leave[officerField] === officerId
+    );
   });
 };
 
+/* =========================================================
+   GET PENDING REQUESTS FOR A PARTICULAR STAGE
+========================================================= */
+
 const getPendingForStage = async (stage, officerId) => {
   const leaves = await getAllLeaveRequests();
-  return filterPendingForStage(leaves, stage, officerId);
+
+  return filterPendingForStage(
+    leaves,
+    stage,
+    officerId
+  );
 };
+
+/* =========================================================
+   GET SINGLE LEAVE REQUEST
+========================================================= */
 
 const getLeaveById = async (leaveId) => {
-  const doc = await db.collection("leaveRequests").doc(leaveId).get();
-  if (!doc.exists) throw new Error("Leave request not found");
-  return { id: doc.id, ...doc.data() };
+  const doc = await db
+    .collection("leaveRequests")
+    .doc(leaveId)
+    .get();
+
+  if (!doc.exists) {
+    throw new Error("Leave request not found");
+  }
+
+  return {
+    id: doc.id,
+    ...doc.data(),
+  };
 };
 
-const hasOverlappingLeave = async (employeeId, startDate, endDate) => {
+/* =========================================================
+   CHECK FOR OVERLAPPING LEAVE
+========================================================= */
+
+const hasOverlappingLeave = async (
+  employeeId,
+  startDate,
+  endDate
+) => {
   const leaves = await getMyLeaveRequests(employeeId);
+
   return leaves.some(
-  (leave) =>
-    !["cancelled", "rejected", "revoked"].includes(leave.status) &&
-    startDate <= leave.endDate &&
-    endDate >= leave.startDate
-);
+    (leave) =>
+      ![
+        "cancelled",
+        "rejected",
+        "revoked",
+      ].includes(leave.status) &&
+      startDate <= leave.endDate &&
+      endDate >= leave.startDate
+  );
 };
+
+/* =========================================================
+   RECORD OFFICER DECISION
+
+   Reporting Officer:
+     recommended / rejected
+
+   Reviewing Officer:
+     recommended / rejected
+
+   Approving Authority:
+     approved / rejected
+========================================================= */
 
 const recordDecision = async ({
   leaveId,
@@ -109,65 +251,240 @@ const recordDecision = async ({
   remark,
   officerId,
 }) => {
-  const ref = db.collection("leaveRequests").doc(leaveId);
+  const validStages = [
+    "reporting",
+    "reviewing",
+    "approving",
+  ];
+
+  if (!validStages.includes(stage)) {
+    throw new Error("Invalid leave workflow stage");
+  }
+
+  const allowedDecisions = {
+    reporting: ["recommended", "rejected"],
+    reviewing: ["recommended", "rejected"],
+    approving: ["approved", "rejected"],
+  };
+
+  if (!allowedDecisions[stage].includes(decision)) {
+    throw new Error(
+      `Invalid decision "${decision}" for ${stage} stage`
+    );
+  }
+
+  const ref = db
+    .collection("leaveRequests")
+    .doc(leaveId);
+
   await db.runTransaction(async (transaction) => {
     const doc = await transaction.get(ref);
-    if (!doc.exists) throw new Error("Leave request not found");
+
+    if (!doc.exists) {
+      throw new Error("Leave request not found");
+    }
+
     const leave = doc.data();
-    if (["cancelled", "rejected", "approved", "revoked"].includes(leave.status)) {
-        throw new Error(`Your Leave Request has been  ${leave.status}`);
+
+    /* -----------------------------------------------------
+       Prevent processing completed/cancelled requests
+    ----------------------------------------------------- */
+
+    if (
+      [
+        "cancelled",
+        "rejected",
+        "approved",
+        "revoked",
+      ].includes(leave.status)
+    ) {
+      throw new Error(
+        `This leave request has already been ${leave.status}.`
+      );
     }
-    if (leave[field] !== "pending") throw new Error("Leave was already reviewed");
-    if (stage === "reviewing" && leave.reportingStatus !== "recommended") {
-      throw new Error("Reporting Officer recommendation is required");
+
+    /* -----------------------------------------------------
+       Determine current status field
+    ----------------------------------------------------- */
+
+    const statusField = `${stage}Status`;
+
+    if (leave[statusField] !== "pending") {
+      throw new Error(
+        `This leave request was already processed by the ${stage} stage.`
+      );
     }
-    if (stage === "approving" && leave.reviewingStatus !== "recommended") {
-      throw new Error("Reviewing Officer recommendation is required");
+
+    /* -----------------------------------------------------
+       Verify correct workflow order
+    ----------------------------------------------------- */
+
+    if (
+      stage === "reviewing" &&
+      leave.reportingStatus !== "recommended"
+    ) {
+      throw new Error(
+        "Reporting Officer recommendation is required before Reviewing Officer action."
+      );
     }
+
+    if (
+      stage === "approving" &&
+      leave.reviewingStatus !== "recommended"
+    ) {
+      throw new Error(
+        "Reviewing Officer recommendation is required before Approving Authority action."
+      );
+    }
+
+    /* -----------------------------------------------------
+       Verify assigned officer
+    ----------------------------------------------------- */
+
+    const officerField =
+      stage === "reporting"
+        ? "reportingOfficerId"
+        : stage === "reviewing"
+          ? "reviewingOfficerId"
+          : "approvingAuthorityId";
+
+    if (
+      leave[officerField] &&
+      leave[officerField] !== officerId
+    ) {
+      throw new Error(
+        "You are not authorized to process this leave request."
+      );
+    }
+
     const now = new Date();
-    const rejected = decision === "rejected";
-    const final = stage === "approving" && decision === "approved";
+
+    const isRejected = decision === "rejected";
+
+    const isFinallyApproved =
+      stage === "approving" &&
+      decision === "approved";
+
+    let overallStatus = "pending";
+
+    if (isRejected) {
+      overallStatus = "rejected";
+    } else if (isFinallyApproved) {
+      overallStatus = "approved";
+    }
+
+    /* -----------------------------------------------------
+       Save decision
+    ----------------------------------------------------- */
+
     transaction.update(ref, {
-      [field]: decision,
+      [statusField]: decision,
+
       [`${stage}Remark`]: remark || "",
+
       [`${stage}ReviewedAt`]: now,
-      status: rejected ? "rejected" : final ? "approved" : "pending",
+
+      status: overallStatus,
+
       approvalHistory: [
         ...(leave.approvalHistory || []),
-        { stage, decision, remark: remark || "", officerId, createdAt: now },
+        {
+          stage,
+          decision,
+          remark: remark || "",
+          officerId,
+          createdAt: now,
+        },
       ],
+
       updatedAt: now,
     });
   });
+
+  return getLeaveById(leaveId);
 };
 
-const cancelLeaveRequest = async (leaveId, employeeId) => {
-  const ref = db.collection("leaveRequests").doc(leaveId);
+/* =========================================================
+   CANCEL LEAVE REQUEST
+========================================================= */
+
+const cancelLeaveRequest = async (
+  leaveId,
+  employeeId
+) => {
+  const ref = db
+    .collection("leaveRequests")
+    .doc(leaveId);
+
   let previousStatus;
   let leaveData;
+
   await db.runTransaction(async (transaction) => {
     const doc = await transaction.get(ref);
-    if (!doc.exists) throw new Error("Leave request not found");
+
+    if (!doc.exists) {
+      throw new Error("Leave request not found");
+    }
+
     const leave = doc.data();
-    if (leave.employeeId !== employeeId) throw new Error("Access denied");
-    if (["cancelled", "rejected"].includes(leave.status)) {
-      throw new Error("This leave cannot be cancelled");
+
+    if (leave.employeeId !== employeeId) {
+      throw new Error("Access denied");
     }
-    if (leave.status === "approved" && leave.startDate < new Date().toISOString().slice(0, 10)) {
-      throw new Error("Past or active approved leave cannot be cancelled");
+
+    if (
+      [
+        "cancelled",
+        "rejected",
+        "revoked",
+      ].includes(leave.status)
+    ) {
+      throw new Error(
+        "This leave request cannot be cancelled."
+      );
     }
+
+    if (
+      leave.status === "approved" &&
+      leave.startDate <
+        new Date().toISOString().slice(0, 10)
+    ) {
+      throw new Error(
+        "Past or active approved leave cannot be cancelled."
+      );
+    }
+
     previousStatus = leave.status;
     leaveData = leave;
+
+    const now = new Date();
+
     transaction.update(ref, {
       status: "cancelled",
-      cancelledAt: new Date(),
-      updatedAt: new Date(),
+      cancelledAt: now,
+      updatedAt: now,
     });
   });
-  return { previousStatus, leave: leaveData };
+
+  return {
+    previousStatus,
+    leave: leaveData,
+  };
 };
 
-const calculateElapsedWorkingDays = (createdAt, holidayDates) => {
+/* =========================================================
+   CALCULATE ELAPSED WORKING DAYS
+
+   Excludes:
+   - Saturday
+   - Sunday
+   - Official holidays from Firestore
+========================================================= */
+
+const calculateElapsedWorkingDays = (
+  createdAt,
+  holidayDates
+) => {
   if (!createdAt) {
     return 0;
   }
@@ -177,16 +494,20 @@ const calculateElapsedWorkingDays = (createdAt, holidayDates) => {
       ? createdAt.toDate()
       : new Date(createdAt);
 
+  if (Number.isNaN(submittedDate.getTime())) {
+    return 0;
+  }
+
   const currentDate = new Date();
 
-  // Normalize both dates to midnight
   submittedDate.setHours(0, 0, 0, 0);
   currentDate.setHours(0, 0, 0, 0);
 
   let workingDays = 0;
 
-  // Start counting from the day after submission
+  // Begin counting from the day after submission
   const date = new Date(submittedDate);
+
   date.setDate(date.getDate() + 1);
 
   while (date < currentDate) {
@@ -198,10 +519,13 @@ const calculateElapsedWorkingDays = (createdAt, holidayDates) => {
       String(date.getDate()).padStart(2, "0"),
     ].join("-");
 
-    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
-    const holiday = holidayDates.has(dateString);
+    const isWeekend =
+      dayOfWeek === 0 || dayOfWeek === 6;
 
-    if (!isWeekend && !holiday) {
+    const isOfficialHoliday =
+      holidayDates.has(dateString);
+
+    if (!isWeekend && !isOfficialHoliday) {
       workingDays++;
     }
 
@@ -210,6 +534,13 @@ const calculateElapsedWorkingDays = (createdAt, holidayDates) => {
 
   return workingDays;
 };
+
+/* =========================================================
+   AUTOMATICALLY REVOKE EXPIRED PENDING LEAVES
+
+   Rule:
+   Revoke after 3 completed working days.
+========================================================= */
 
 const revokeExpiredLeaveRequests = async () => {
   const holidayDates = await getHolidayDates();
@@ -231,19 +562,23 @@ const revokeExpiredLeaveRequests = async () => {
   for (const doc of snapshot.docs) {
     const leave = doc.data();
 
-    const elapsedWorkingDays = calculateElapsedWorkingDays(
-      leave.createdAt,
-      holidayDates
-    );
+    const elapsedWorkingDays =
+      calculateElapsedWorkingDays(
+        leave.createdAt,
+        holidayDates
+      );
 
     if (elapsedWorkingDays >= 3) {
       const now = new Date();
 
       await doc.ref.update({
         status: "revoked",
+
         revokedAt: now,
+
         revokedReason:
-          "Automatically revoked after remaining pending for more than 3 working days.",
+          "Automatically revoked after remaining pending for 3 working days.",
+
         updatedAt: now,
       });
 
@@ -263,8 +598,14 @@ const revokeExpiredLeaveRequests = async () => {
   };
 };
 
+/* =========================================================
+   CLEAR ALL LEAVE REQUESTS
+========================================================= */
+
 const clearAllLeaveRequests = async () => {
-  const snapshot = await db.collection("leaveRequests").get();
+  const snapshot = await db
+    .collection("leaveRequests")
+    .get();
 
   if (snapshot.empty) {
     return {
@@ -273,11 +614,13 @@ const clearAllLeaveRequests = async () => {
   }
 
   const docs = snapshot.docs;
+
   let deletedCount = 0;
 
-  // Firestore allows up to 500 operations per batch
+  // Firestore batch limit: maximum 500 operations
   for (let i = 0; i < docs.length; i += 500) {
     const batch = db.batch();
+
     const chunk = docs.slice(i, i + 500);
 
     chunk.forEach((doc) => {
@@ -285,6 +628,7 @@ const clearAllLeaveRequests = async () => {
     });
 
     await batch.commit();
+
     deletedCount += chunk.length;
   }
 
@@ -293,16 +637,28 @@ const clearAllLeaveRequests = async () => {
   };
 };
 
+/* =========================================================
+   EXPORTS
+========================================================= */
+
 module.exports = {
   createLeaveRequest,
   getMyLeaveRequests,
   getAllLeaveRequests,
+
+  // Required by officer dashboards
+  filterPendingForStage,
   getPendingForStage,
+
   getLeaveById,
   hasOverlappingLeave,
   recordDecision,
   cancelLeaveRequest,
+
+  // Admin feature
   clearAllLeaveRequests,
+
+  // Automatic revocation
+  calculateElapsedWorkingDays,
   revokeExpiredLeaveRequests,
-  filterPendingForStage,
 };
