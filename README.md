@@ -1,78 +1,108 @@
 # 🏢 Internal Leave Management System (ILMS)
 
-A secure, cloud-based full-stack web application designed to digitize and automate the internal employee leave management process of an organization.
+> A secure, cloud-based, full-stack web application designed to digitize and automate the internal employee leave management process of an organization.
+
+---
+
+## 📌 Project Information
+
+| Field | Details |
+|---|---|
+| **Project Title** | Internal Leave Management System (ILMS) |
+| **Project Type** | Full-Stack Web Application |
+| **Frontend** | React.js + Vite |
+| **Backend** | Node.js + Express.js |
+| **Database** | Firebase Firestore |
+| **Authentication** | Firebase Authentication |
+| **Security** | Firebase ID Tokens, RBAC, Helmet, CORS |
+| **Developers** | Suprakash Debnath & Chayanika Debnath |
 
 ---
 
 ## 👨‍💻 Project Developers
 
-| Name | Role |
-|---|---|
-| **Suprakash Debnath** | Project Developer |
-| **Chayanika Debnath** | Project Developer |
+### Suprakash Debnath
+
+**Project Developer**
+
+### Chayanika Debnath
+
+**Project Developer**
 
 ---
 
-## 📌 Project Overview
+# 📖 About the Project
 
-The **Internal Leave Management System (ILMS)** is a full-stack web application developed to automate and simplify the complete employee leave management process.
+The **Internal Leave Management System (ILMS)** is a secure, cloud-based full-stack web application developed to automate and simplify the complete employee leave management process within an organization.
 
-The system eliminates traditional paper-based leave applications and provides a secure digital platform where employees can apply for leave, track application status, view leave balances, and receive notifications.
+Traditional leave management systems often rely on paperwork, manual approval processes, physical records, and direct communication between employees and administrative authorities. These processes can result in:
 
-The application implements a structured **multi-level leave approval workflow** involving:
+- Delayed approvals
+- Human errors
+- Incorrect leave balance calculations
+- Poor transparency
+- Difficulty tracking leave applications
+- Increased administrative workload
+- Inefficient record management
 
-1. Employee
-2. Reporting Officer
-3. Reviewing Officer
-4. Approving Authority
+The ILMS solves these problems by providing a centralized digital platform where employees can securely apply for leave, track their application status, view leave balances, and receive notifications.
 
-An **Admin** manages employee accounts, organizational information, user roles, holidays, and other administrative operations.
+The system implements a structured **three-level leave approval workflow** involving:
 
-The application is developed using modern web technologies including **React.js, Vite, Node.js, Express.js, Firebase Authentication, and Firebase Firestore**.
+1. Reporting Officer
+2. Reviewing Officer
+3. Approving Authority
+
+An **Admin** manages employee accounts, user roles, organizational hierarchy, holidays, and other administrative operations.
 
 ---
 
-## 🎯 Project Objectives
+# 🎯 Project Objectives
 
-The main objectives of the Internal Leave Management System are:
+The primary objectives of the Internal Leave Management System are:
 
-- Automate the employee leave application process.
+- Automate the complete employee leave application process.
 - Eliminate paper-based leave management.
 - Reduce administrative workload.
 - Provide secure user authentication.
 - Implement Role-Based Access Control (RBAC).
 - Provide a structured multi-level approval workflow.
 - Maintain accurate employee leave balances.
-- Provide real-time leave status tracking.
+- Allow real-time leave application status tracking.
 - Manage organizational holidays.
 - Improve transparency and accountability.
 - Store organizational data securely in the cloud.
+- Protect sensitive employee information.
 - Provide a scalable foundation for future HRMS development.
 
 ---
 
-## 👥 User Roles
+# 👥 User Roles
 
-The system supports five primary user roles.
+The ILMS supports five primary user roles.
 
-### 1. Admin
+## 1. Admin
+
+The Admin is responsible for managing the application and organizational users.
 
 The Admin can:
 
 - Create employee accounts.
 - Manage employee information.
-- Assign organizational roles.
+- Assign user roles.
 - Assign Reporting Officers.
 - Assign Reviewing Officers.
 - Assign Approving Authorities.
-- Manage holidays.
-- View administrative dashboard information.
+- Manage organizational holidays.
+- View administrative dashboards.
 - Monitor leave-related activities.
 - Manage organizational data.
 
-### 2. Employee
+---
 
-The Employee can:
+## 2. Employee
+
+An Employee can:
 
 - Login securely.
 - View the employee dashboard.
@@ -84,7 +114,9 @@ The Employee can:
 - Cancel eligible leave applications.
 - Receive notifications.
 
-### 3. Reporting Officer
+---
+
+## 3. Reporting Officer
 
 The Reporting Officer can:
 
@@ -95,22 +127,27 @@ The Reporting Officer can:
 - Add remarks.
 - Forward recommended requests to the Reviewing Officer.
 
-### 4. Reviewing Officer
+---
+
+## 4. Reviewing Officer
 
 The Reviewing Officer can:
 
-- View requests forwarded by the Reporting Officer.
-- Review leave details.
-- Recommend or reject requests.
+- View leave applications forwarded by the Reporting Officer.
+- Review complete leave details.
+- Recommend applications.
+- Reject applications where permitted.
 - Add remarks.
-- Forward recommended requests to the Approving Authority.
+- Forward recommended applications to the Approving Authority.
 
-### 5. Approving Authority
+---
+
+## 5. Approving Authority
 
 The Approving Authority can:
 
-- View requests forwarded for final approval.
-- Review complete leave application details.
+- View applications forwarded for final approval.
+- Review complete application details.
 - Approve leave applications.
 - Reject leave applications.
 - Add final remarks.
@@ -118,9 +155,7 @@ The Approving Authority can:
 
 ---
 
-## 🔄 System Workflow
-
-The basic application workflow is:
+# 🔄 Complete System Workflow
 
 ```text
 Admin Creates Employee Account
@@ -133,19 +168,25 @@ Employee Receives Login Credentials
             ↓
 Employee Logs In
             ↓
-Firebase ID Token Generated
+Firebase Generates ID Token
             ↓
 Employee Accesses Dashboard
             ↓
 Employee Applies for Leave
             ↓
+Leave Request Stored in Firestore
+            ↓
 Reporting Officer Reviews Request
+            ↓
+Recommend / Reject
             ↓
 Reviewing Officer Reviews Request
             ↓
+Recommend / Reject
+            ↓
 Approving Authority Makes Final Decision
             ↓
-Leave Approved or Rejected
+Approve / Reject
             ↓
 Leave Balance Updated Where Applicable
             ↓
@@ -156,9 +197,9 @@ Employee Views Final Status
 
 ---
 
-## 🛠️ Technology Stack
+# 🛠️ Technology Stack
 
-### Frontend
+## Frontend
 
 - React.js
 - Vite
@@ -166,25 +207,25 @@ Employee Views Final Status
 - HTML5
 - CSS3
 
-### Backend
+## Backend
 
 - Node.js
 - Express.js
 - REST APIs
 
-### Database
+## Database
 
 - Firebase Firestore
 
-### Authentication
+## Authentication
 
 - Firebase Authentication
 
-### Backend Firebase Integration
+## Backend Firebase Integration
 
 - Firebase Admin SDK
 
-### Security
+## Security
 
 - Firebase ID Token Verification
 - Role-Based Access Control (RBAC)
@@ -195,23 +236,25 @@ Employee Views Final Status
 - Firestore Security Rules
 - Audit Logging
 
-### Additional Services
+## Additional Features
 
 Depending on the final configuration:
 
 - Email notifications
-- Audit logging
 - Dashboard statistics
 - Holiday management
+- Leave history
+- Notifications
+- Audit logs
 - Request validation
 
 ---
 
-## ✨ Main Features
+# ✨ Main Features
 
 The Internal Leave Management System includes:
 
-- Secure login system.
+- Secure user login.
 - Firebase Authentication.
 - Firebase ID Token verification.
 - Role-Based Access Control.
@@ -237,53 +280,52 @@ The Internal Leave Management System includes:
 
 ---
 
-## 🏗️ System Architecture
-
-The application follows a modern full-stack layered architecture:
+# 🏗️ System Architecture
 
 ```text
-┌─────────────────────────────┐
-│          USERS              │
-│ Admin / Employee / Officers │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│    REACT.JS + VITE          │
-│       Frontend UI           │
-└──────────────┬──────────────┘
-               │ HTTPS / REST API
-               ▼
-┌─────────────────────────────┐
-│  NODE.JS + EXPRESS.JS       │
-│       Backend API           │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│     SECURITY MIDDLEWARE     │
-│ Auth │ RBAC │ Validation    │
-│ Helmet │ CORS │ ID Tokens   │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│      BUSINESS LOGIC         │
-│ Controllers and Services    │
-└───────┬─────────────┬───────┘
-        │             │
-        ▼             ▼
-┌──────────────┐  ┌───────────────┐
-│  FIREBASE    │  │   FIRESTORE   │
-│     AUTH     │  │   DATABASE    │
-└──────────────┘  └───────────────┘
+┌───────────────────────────────────────┐
+│                 USERS                 │
+│ Admin │ Employee │ Officers │ Authority│
+└──────────────────┬────────────────────┘
+                   │
+                   ▼
+┌───────────────────────────────────────┐
+│           REACT.JS + VITE             │
+│              Frontend UI              │
+└──────────────────┬────────────────────┘
+                   │
+                   │ REST API / HTTP(S)
+                   ▼
+┌───────────────────────────────────────┐
+│         NODE.JS + EXPRESS.JS          │
+│              Backend API              │
+└──────────────────┬────────────────────┘
+                   │
+                   ▼
+┌───────────────────────────────────────┐
+│          SECURITY MIDDLEWARE          │
+│ Authentication │ RBAC │ Validation    │
+│ Helmet │ CORS │ Firebase ID Tokens    │
+└──────────────────┬────────────────────┘
+                   │
+                   ▼
+┌───────────────────────────────────────┐
+│            BUSINESS LOGIC             │
+│     Controllers │ Services │ Utils    │
+└──────────────┬────────────────┬───────┘
+               │                │
+               ▼                ▼
+┌─────────────────────┐  ┌─────────────────────┐
+│ FIREBASE AUTH       │  │ FIRESTORE DATABASE  │
+│ User Authentication │  │ Cloud Data Storage  │
+└─────────────────────┘  └─────────────────────┘
 ```
 
 ---
 
-## 📁 Project Folder Structure
+# 📁 Project Folder Structure
 
-A simplified representation of the project structure is shown below:
+A simplified representation of the ILMS project structure is:
 
 ```text
 ILMS/
@@ -317,6 +359,7 @@ ILMS/
 │   ├── config/
 │   ├── utils/
 │   ├── scripts/
+│   │   └── createAdmin.js
 │   ├── tests/
 │   ├── package.json
 │   ├── .env
@@ -328,17 +371,55 @@ ILMS/
 └── README.md
 ```
 
-> **Note:** The exact folder structure may differ slightly depending on the final project version.
+> **Note:** The exact folder structure may differ slightly depending on the final project version. Always check the actual source code before changing paths or filenames.
 
 ---
 
-# 🚀 Complete Installation and Setup Guide
+# 🚀 COMPLETE INSTALLATION AND SETUP GUIDE
 
-Follow the steps below carefully to run the ILMS project on another computer without sharing the original `.env` files or Firebase Service Account Key.
+This section explains how another developer, internship mentor, or organization can run the ILMS project without receiving the original developer's `.env` files or Firebase Service Account Key.
+
+The complete setup process is:
+
+```text
+Receive ILMS Source Code
+        ↓
+Install Node.js and npm
+        ↓
+Install Project Dependencies
+        ↓
+Create Own Firebase Project
+        ↓
+Enable Firebase Authentication
+        ↓
+Create Firestore Database
+        ↓
+Register Firebase Web App
+        ↓
+Create Frontend .env
+        ↓
+Generate Firebase Service Account Key
+        ↓
+Place serviceAccountKey.json in Backend
+        ↓
+Create Backend .env
+        ↓
+Deploy Firestore Rules and Indexes
+        ↓
+Create First Admin Account
+        ↓
+Start Backend
+        ↓
+Start Frontend
+        ↓
+Login as Admin
+        ↓
+Create Other Users
+```
 
 ---
 
-## Step 1: Install Required Software
+# STEP 1 — Install Required Software
 
 Before running the project, install:
 
@@ -349,7 +430,7 @@ Before running the project, install:
 - Git (optional)
 - A Google account for Firebase
 
-Check whether Node.js is installed:
+Check Node.js:
 
 ```bash
 node --version
@@ -361,17 +442,17 @@ Check npm:
 npm --version
 ```
 
-If both commands display version numbers, the installation is successful.
+If both commands display version numbers, Node.js and npm are installed correctly.
 
 ---
 
-## Step 2: Download or Extract the Project
+# STEP 2 — Download or Extract the Project
 
 If the project was received as a ZIP file:
 
 1. Download the ZIP file.
 2. Extract the ZIP file.
-3. Open the extracted project folder in Visual Studio Code.
+3. Open the extracted folder in Visual Studio Code.
 
 If using Git:
 
@@ -379,7 +460,7 @@ If using Git:
 git clone <your-repository-url>
 ```
 
-Then enter the project folder:
+Enter the project folder:
 
 ```bash
 cd <project-folder-name>
@@ -387,9 +468,11 @@ cd <project-folder-name>
 
 ---
 
-## Step 3: Install Frontend Dependencies
+# STEP 3 — Install Frontend Dependencies
 
-Open the VS Code terminal and navigate to the frontend directory:
+Open a terminal in Visual Studio Code.
+
+Navigate to the frontend folder:
 
 ```bash
 cd frontend
@@ -401,48 +484,50 @@ Install dependencies:
 npm install
 ```
 
-Wait until all required frontend packages are installed.
+Wait for the installation to complete.
 
 Do not start the frontend yet because Firebase configuration must be completed first.
 
 ---
 
-## Step 4: Install Backend Dependencies
+# STEP 4 — Install Backend Dependencies
 
 Open another terminal.
 
-Navigate to the backend directory:
+Navigate to the backend folder:
 
 ```bash
 cd backend
 ```
 
-Install backend dependencies:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Wait until the installation is complete.
+Wait for installation to complete.
 
 ---
 
-# 🔥 Firebase Configuration
+# 🔥 FIREBASE SETUP
 
-The project requires a Firebase project for:
+The project requires Firebase for:
 
-- Firebase Authentication
-- Firestore Database
-- Frontend Firebase SDK
-- Backend Firebase Admin SDK
+- User authentication.
+- Firestore cloud database.
+- Frontend Firebase SDK.
+- Backend Firebase Admin SDK.
 
-Each person or organization running this project should use their own Firebase project and credentials.
+Each person or organization running this project should create and use their own Firebase project.
 
 ---
 
-## Step 5: Create a Firebase Project
+# STEP 5 — Create a Firebase Project
 
-Open the Firebase Console in your browser.
+Open the Firebase Console:
+
+https://console.firebase.google.com/
 
 Then:
 
@@ -458,15 +543,15 @@ internal-leave-management-system
 
 4. Continue through the project creation process.
 5. Google Analytics is optional for local development.
-6. Wait for Firebase to finish creating the project.
+6. Wait until Firebase finishes creating the project.
 
 ---
 
-## Step 6: Enable Firebase Authentication
+# STEP 6 — Enable Firebase Authentication
 
-Inside the Firebase Console:
+Inside Firebase Console:
 
-1. Open the Firebase project.
+1. Open your Firebase project.
 2. Navigate to:
 
 ```text
@@ -484,11 +569,11 @@ Email/Password
 6. Enable Email/Password authentication.
 7. Save the configuration.
 
-The ILMS application does not require public registration because employee accounts are intended to be created by an Admin.
+The ILMS application does not require public user registration because employee accounts are intended to be created by an Admin.
 
 ---
 
-## Step 7: Create the Firestore Database
+# STEP 7 — Create Firestore Database
 
 Inside Firebase Console:
 
@@ -499,20 +584,23 @@ Build → Firestore Database
 ```
 
 2. Click **Create Database**.
-3. Select an appropriate database location.
-4. Complete database creation.
+3. Select the appropriate database mode.
+4. Select a suitable database location.
+5. Complete database creation.
 
 For production deployment, always use secure Firestore Security Rules.
 
 ---
 
-## Step 8: Register the Frontend as a Firebase Web Application
+# STEP 8 — Register a Firebase Web Application
 
-Inside the Firebase Console:
+The frontend requires Firebase Web SDK configuration.
+
+Inside Firebase Console:
 
 1. Open **Project Settings**.
-2. Scroll to **Your apps**.
-3. Click the Web Application icon:
+2. Scroll down to **Your apps**.
+3. Click the Web icon:
 
 ```text
 </>
@@ -541,13 +629,15 @@ const firebaseConfig = {
 };
 ```
 
-Do not copy the example values literally. Use the actual configuration values generated for your own Firebase project.
+Do not copy these example values literally.
+
+Use the actual configuration generated by your own Firebase project.
 
 ---
 
-# 🔐 Frontend Environment Configuration
+# 🔐 FRONTEND ENVIRONMENT CONFIGURATION
 
-## Step 9: Create the Frontend `.env` File
+# STEP 9 — Create the Frontend `.env` File
 
 Inside the frontend folder, create a file named:
 
@@ -555,7 +645,7 @@ Inside the frontend folder, create a file named:
 .env
 ```
 
-The path should be:
+Expected path:
 
 ```text
 ILMS/
@@ -563,7 +653,7 @@ ILMS/
     └── .env
 ```
 
-Add the following variables:
+Add:
 
 ```env
 VITE_FIREBASE_API_KEY=your_firebase_api_key
@@ -576,41 +666,102 @@ VITE_FIREBASE_APP_ID=your_firebase_app_id
 VITE_API_BASE_URL=http://localhost:5000/api
 ```
 
-Replace every placeholder with the actual values from your Firebase project.
+Replace every placeholder with actual values from your Firebase project.
 
-### Important
+## Important for Vite
 
-All environment variables exposed to a Vite frontend must begin with:
+Frontend environment variables that need to be accessible in browser code must begin with:
 
 ```text
 VITE_
 ```
 
-After changing the `.env` file, restart the Vite development server.
+After changing the frontend `.env`, restart the Vite development server.
 
 ---
 
-# 🔑 Firebase Admin SDK Configuration
+# 🔑 FIREBASE ADMIN SDK SERVICE ACCOUNT KEY
 
-## Step 10: Generate a Firebase Service Account Key
+The backend requires Firebase Admin SDK credentials to perform trusted server-side operations such as:
 
-The backend requires Firebase Admin SDK credentials.
+- Verify Firebase ID Tokens.
+- Access Firestore securely.
+- Create Firebase Authentication users.
+- Manage employee accounts.
+- Create the first Admin account.
+- Perform privileged backend operations.
 
-Inside the Firebase Console:
+For security reasons, the real `serviceAccountKey.json` should never be included in a public repository or shared source-code ZIP.
 
-1. Open your Firebase project.
-2. Click the gear icon.
-3. Open **Project Settings**.
-4. Select the **Service accounts** tab.
-5. Find the **Firebase Admin SDK** section.
-6. Click:
+---
+
+# STEP 10 — Generate `serviceAccountKey.json`
+
+Follow these steps carefully.
+
+## 10.1 Open Firebase Console
+
+Open:
+
+```text
+https://console.firebase.google.com/
+```
+
+Sign in and select the Firebase project created for ILMS.
+
+## 10.2 Open Project Settings
+
+Inside the project:
+
+```text
+Project Overview
+        ↓
+Gear Icon ⚙️
+        ↓
+Project Settings
+```
+
+## 10.3 Open Service Accounts
+
+Select:
+
+```text
+Service accounts
+```
+
+Find the:
+
+```text
+Firebase Admin SDK
+```
+
+section.
+
+## 10.4 Generate New Private Key
+
+Click:
 
 ```text
 Generate new private key
 ```
 
-7. Confirm the action.
-8. A JSON file will be downloaded.
+Firebase will display a confirmation warning.
+
+Click:
+
+```text
+Generate key
+```
+
+A JSON file will automatically download to the computer.
+
+The original filename may look similar to:
+
+```text
+internal-leave-management-firebase-adminsdk-fbsvc-abc123.json
+```
+
+## 10.5 Rename the File
 
 Rename the downloaded file to:
 
@@ -618,40 +769,60 @@ Rename the downloaded file to:
 serviceAccountKey.json
 ```
 
-Place the file inside:
+## 10.6 Place the File in the Backend
+
+Place it inside:
 
 ```text
 backend/firebase/
 ```
 
-The complete path should be:
+The final location should be:
 
 ```text
 ILMS/
+│
 └── backend/
+    │
     └── firebase/
+        │
         └── serviceAccountKey.json
 ```
 
-### ⚠️ Critical Security Warning
+Expected path:
 
-Never:
-
-- Upload `serviceAccountKey.json` to GitHub.
-- Commit it to Git.
-- Share it publicly.
-- Include it in screenshots.
-- Send it through unsecured communication channels.
-
-A Firebase service account private key provides privileged backend access to Firebase resources.
+```text
+backend/firebase/serviceAccountKey.json
+```
 
 ---
 
-## Step 11: Firebase Admin SDK Initialization
+# ⚠️ CRITICAL SECURITY WARNING
 
-The backend should initialize Firebase Admin SDK using the service account key.
+The `serviceAccountKey.json` file contains a private key and privileged Firebase credentials.
 
-A typical configuration is:
+Never:
+
+- Upload it to GitHub.
+- Commit it to Git.
+- Share it publicly.
+- Include it in screenshots.
+- Send its contents in public messages.
+- Place it inside frontend code.
+- Expose it through an API response.
+
+If a Service Account Key is accidentally exposed:
+
+1. Immediately revoke or delete the compromised key.
+2. Generate a new key.
+3. Update the backend configuration.
+4. Review Firebase and Google Cloud logs where appropriate.
+
+---
+
+# STEP 11 — Firebase Admin SDK Initialization
+
+A typical Firebase Admin SDK configuration looks like:
 
 ```javascript
 const admin = require("firebase-admin");
@@ -673,13 +844,17 @@ module.exports = {
 };
 ```
 
-Use the existing Firebase configuration file included in the project. Do not create duplicate Firebase initialization code unless required.
+Use the Firebase initialization code already included in the project.
+
+Do not create duplicate Firebase Admin instances unless required.
+
+The relative path to `serviceAccountKey.json` must match the actual location of the Firebase configuration file.
 
 ---
 
-# ⚙️ Backend Environment Configuration
+# ⚙️ BACKEND ENVIRONMENT CONFIGURATION
 
-## Step 12: Create the Backend `.env` File
+# STEP 12 — Create the Backend `.env` File
 
 Inside the backend folder, create:
 
@@ -687,7 +862,7 @@ Inside the backend folder, create:
 .env
 ```
 
-Path:
+Expected path:
 
 ```text
 ILMS/
@@ -695,7 +870,7 @@ ILMS/
     └── .env
 ```
 
-A basic configuration may look like:
+Basic example:
 
 ```env
 PORT=5000
@@ -704,28 +879,28 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 ```
 
-If email notification functionality is enabled, additional environment variables may be required:
+If email notifications are enabled:
 
 ```env
 EMAIL_USER=your_email@example.com
 EMAIL_PASSWORD=your_email_app_password
 ```
 
-### Important
+## Important
 
-The exact variable names must match those referenced by the project's source code.
+The exact environment-variable names must match those referenced in the source code.
 
 Do not rename environment variables without updating the corresponding source code.
 
 ---
 
-# 📧 Optional Email Notification Setup
+# 📧 OPTIONAL EMAIL NOTIFICATION SETUP
 
-If the ILMS project uses email notifications, configure the email service.
+If the ILMS project uses email notifications, configure an email account.
 
 For Gmail:
 
-1. Sign in to the Google account that will send emails.
+1. Sign in to the Google account that will send notifications.
 2. Enable 2-Step Verification.
 3. Create a Google App Password if available for the account.
 4. Add the email address and App Password to the backend `.env`.
@@ -737,15 +912,369 @@ EMAIL_USER=your-email@gmail.com
 EMAIL_PASSWORD=your-app-password
 ```
 
-Never use or publish your actual email password.
+Never publish or commit the real email password or App Password.
 
 ---
 
-# 🛡️ Configure `.gitignore`
+# 👑 CREATING THE FIRST ADMIN ACCOUNT
 
-Sensitive files must not be uploaded to GitHub.
+This is one of the most important setup steps.
 
-At the root of the project, create or verify:
+Because public registration is disabled and only an Admin can create employees, a new installation has a bootstrap problem:
+
+```text
+No Admin Exists
+        ↓
+Nobody Can Login as Admin
+        ↓
+Nobody Can Create Employees
+```
+
+Therefore, the first Admin must be created separately.
+
+The recommended solution is a **one-time Admin creation script**.
+
+---
+
+# METHOD 1 — RECOMMENDED: Create First Admin Using a Script
+
+The recommended project structure is:
+
+```text
+backend/
+│
+├── scripts/
+│   └── createAdmin.js
+│
+├── firebase/
+│   └── serviceAccountKey.json
+│
+├── package.json
+└── .env
+```
+
+The person setting up the application runs:
+
+```bash
+cd backend
+npm run create-admin
+```
+
+The script should ask for:
+
+```text
+==========================================
+        ILMS FIRST ADMIN SETUP
+==========================================
+
+Enter Admin Name:
+Enter Admin Email:
+Enter Admin Password:
+Enter Employee ID:
+
+Creating Firebase Authentication account...
+
+✓ Authentication account created successfully.
+
+Creating Firestore Admin profile...
+
+✓ Firestore Admin profile created successfully.
+
+==========================================
+    ADMIN ACCOUNT CREATED SUCCESSFULLY
+==========================================
+
+You can now start the application and login.
+```
+
+The script should create:
+
+```text
+Firebase Authentication
+        │
+        ├── UID
+        ├── Email
+        └── Password
+                ↓
+Firestore User Profile
+        │
+        ├── uid
+        ├── name
+        ├── email
+        ├── employeeId
+        ├── role
+        ├── isActive
+        └── timestamps
+```
+
+---
+
+# Example `createAdmin.js`
+
+> **Important:** This is a generic example. Field names, Firebase configuration imports, collection names, and role values must match the actual project implementation.
+
+```javascript
+const readline = require("readline");
+const { auth, db } = require("../config/firebaseAdmin");
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+function askQuestion(question) {
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      resolve(answer.trim());
+    });
+  });
+}
+
+async function createFirstAdmin() {
+  console.log("\n==========================================");
+  console.log("        ILMS FIRST ADMIN SETUP");
+  console.log("==========================================\n");
+
+  try {
+    const name = await askQuestion("Enter Admin Name: ");
+    const email = await askQuestion("Enter Admin Email: ");
+    const password = await askQuestion("Enter Admin Password: ");
+    const employeeId = await askQuestion("Enter Employee ID: ");
+
+    if (!name || !email || !password || !employeeId) {
+      throw new Error("All fields are required.");
+    }
+
+    if (password.length < 6) {
+      throw new Error(
+        "Firebase Authentication requires a password of at least 6 characters."
+      );
+    }
+
+    console.log("\nChecking whether the Admin already exists...");
+
+    try {
+      const existingUser = await auth.getUserByEmail(email);
+
+      if (existingUser) {
+        console.log("\nAn Authentication account already exists with this email.");
+        console.log("No duplicate Admin was created.");
+        return;
+      }
+    } catch (error) {
+      if (error.code !== "auth/user-not-found") {
+        throw error;
+      }
+    }
+
+    console.log("Creating Firebase Authentication account...");
+
+    const userRecord = await auth.createUser({
+      email,
+      password,
+      displayName: name,
+      emailVerified: false,
+      disabled: false
+    });
+
+    console.log("✓ Authentication account created successfully.");
+
+    console.log("Creating Firestore Admin profile...");
+
+    await db.collection("users").doc(userRecord.uid).set({
+      uid: userRecord.uid,
+      name,
+      email,
+      employeeId,
+      role: "admin",
+      isActive: true,
+      forcePasswordChange: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    console.log("✓ Firestore Admin profile created successfully.");
+
+    console.log("\n==========================================");
+    console.log("    ADMIN ACCOUNT CREATED SUCCESSFULLY");
+    console.log("==========================================");
+    console.log(`Name        : ${name}`);
+    console.log(`Email       : ${email}`);
+    console.log(`Employee ID : ${employeeId}`);
+    console.log("Role        : admin");
+    console.log("==========================================");
+    console.log("\nYou can now start ILMS and login as Admin.\n");
+  } catch (error) {
+    console.error("\nAdmin creation failed:");
+    console.error(error.message);
+  } finally {
+    rl.close();
+  }
+}
+
+createFirstAdmin();
+```
+
+---
+
+# Add Admin Script to `package.json`
+
+Inside the backend `package.json`, add:
+
+```json
+{
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "create-admin": "node scripts/createAdmin.js"
+  }
+}
+```
+
+Do not replace existing scripts unnecessarily. Add the `create-admin` script to the existing `scripts` object.
+
+Then run:
+
+```bash
+npm run create-admin
+```
+
+---
+
+# METHOD 2 — Create First Admin Manually
+
+If the Admin script is unavailable, create the first Admin manually.
+
+## Step A — Create Firebase Authentication User
+
+Open:
+
+```text
+Firebase Console
+    ↓
+Authentication
+    ↓
+Users
+    ↓
+Add User
+```
+
+Enter:
+
+- Admin email.
+- Secure password.
+
+Create the user.
+
+Copy the Firebase UID.
+
+---
+
+## Step B — Create Firestore User Profile
+
+Open:
+
+```text
+Firebase Console
+    ↓
+Firestore Database
+```
+
+Create the required user collection.
+
+For example:
+
+```text
+users
+```
+
+Create a document whose Document ID is exactly the same as the Firebase Authentication UID.
+
+Example:
+
+```text
+Document ID:
+Firebase Authentication UID
+```
+
+Example fields:
+
+```text
+uid: "firebase-user-uid"
+name: "System Administrator"
+email: "admin@example.com"
+employeeId: "ADMIN001"
+role: "admin"
+isActive: true
+forcePasswordChange: false
+```
+
+## Important
+
+The exact:
+
+- Collection name
+- Field names
+- Role value
+- Capitalization
+- Required profile fields
+
+must match the actual source code.
+
+For example, if the code expects:
+
+```text
+Admin
+```
+
+do not use:
+
+```text
+admin
+```
+
+unless the source code supports that value.
+
+---
+
+# 🔐 COMPLETE FIRST ADMIN FLOW
+
+```text
+Create Firebase Project
+        ↓
+Enable Authentication
+        ↓
+Create Firestore Database
+        ↓
+Generate serviceAccountKey.json
+        ↓
+Place Key in backend/firebase/
+        ↓
+Configure .env Files
+        ↓
+Run:
+npm run create-admin
+        ↓
+Enter Admin Information
+        ↓
+Firebase Auth Account Created
+        ↓
+Firestore Admin Profile Created
+        ↓
+Start Backend
+        ↓
+Start Frontend
+        ↓
+Login Using Admin Credentials
+        ↓
+Admin Creates Employees and Officers
+```
+
+---
+
+# 🛡️ CONFIGURE `.gitignore`
+
+Create or verify the root-level:
 
 ```text
 .gitignore
@@ -757,7 +1286,7 @@ Add:
 # Dependencies
 **/node_modules/
 
-# Environment Variables
+# Environment Files
 **/.env
 **/.env.local
 **/.env.production
@@ -765,7 +1294,7 @@ Add:
 # Firebase Admin SDK Private Key
 backend/firebase/serviceAccountKey.json
 
-# Frontend Build
+# Frontend Build Output
 frontend/dist/
 
 # Logs
@@ -778,9 +1307,11 @@ Thumbs.db
 
 ---
 
-# 📄 Create `.env.example` Files
+# 📄 CREATE `.env.example` FILES
 
-It is recommended to include example environment files so another developer knows which configuration values are required.
+It is recommended to include example environment files so another developer knows what configuration is required.
+
+---
 
 ## Frontend `.env.example`
 
@@ -825,111 +1356,11 @@ EMAIL_USER=
 EMAIL_PASSWORD=
 ```
 
-Never place actual passwords, private keys, or production secrets inside `.env.example`.
+Never place real passwords, private keys, or production secrets inside `.env.example`.
 
 ---
 
-# 👑 Creating the First Admin Account
-
-Since public registration should be disabled, the first Admin account must be created manually or through the project's Admin seed script.
-
----
-
-## Method 1: Create Admin Manually
-
-### Step A: Create Firebase Authentication User
-
-Open:
-
-```text
-Firebase Console
-→ Authentication
-→ Users
-→ Add User
-```
-
-Enter:
-
-- Admin email address.
-- Secure password.
-
-Create the user.
-
-Copy the user's Firebase UID.
-
----
-
-### Step B: Create Admin Profile in Firestore
-
-Open:
-
-```text
-Firebase Console
-→ Firestore Database
-```
-
-Create the required user collection if it does not already exist.
-
-For example:
-
-```text
-users
-```
-
-Create a document whose Document ID matches the Firebase Authentication UID.
-
-Example fields:
-
-```text
-name: "System Administrator"
-email: "admin@example.com"
-employeeId: "ADMIN001"
-role: "admin"
-isActive: true
-forcePasswordChange: false
-```
-
-### Important
-
-The exact collection name, field names, and role values must match the source code.
-
-For example, if the source code expects:
-
-```text
-Admin
-```
-
-instead of:
-
-```text
-admin
-```
-
-use the exact expected value.
-
----
-
-## Method 2: Use the Admin Seed Script
-
-If the backend contains an Admin seeding script inside:
-
-```text
-backend/scripts/
-```
-
-use the actual script provided by the project.
-
-For example:
-
-```bash
-node scripts/seedAdmin.js
-```
-
-The exact filename may differ. Check the `scripts` folder and `package.json`.
-
----
-
-# 🔒 Firestore Security Rules
+# 🔒 FIRESTORE SECURITY RULES
 
 If the project contains:
 
@@ -951,7 +1382,7 @@ Login:
 firebase login
 ```
 
-Initialize Firebase if necessary:
+Initialize Firebase if required:
 
 ```bash
 firebase init
@@ -969,55 +1400,55 @@ Deploy Firestore Security Rules:
 firebase deploy --only firestore:rules
 ```
 
-If the project includes:
+If the project contains:
 
 ```text
 firestore.indexes.json
 ```
 
-deploy indexes using:
+deploy indexes:
 
 ```bash
 firebase deploy --only firestore:indexes
 ```
 
-### Never use insecure production rules such as:
+Never use unrestricted production rules such as:
 
 ```javascript
 allow read, write: if true;
 ```
 
-This would allow unrestricted access to the database.
+This would allow unauthorized database access.
 
 ---
 
-# ▶️ Running the Application
+# ▶️ RUNNING THE APPLICATION
 
-Once all dependencies and Firebase configuration are complete, start the backend and frontend separately.
+After completing all configuration, start the backend and frontend separately.
 
 ---
 
-## Step 13: Start the Backend
+# STEP 13 — Start the Backend
 
-Open a terminal:
+Open Terminal 1:
 
 ```bash
 cd backend
 ```
 
-Install dependencies if not already installed:
+Install dependencies if necessary:
 
 ```bash
 npm install
 ```
 
-Start the backend using the appropriate script:
+Start development mode:
 
 ```bash
 npm run dev
 ```
 
-If the project does not contain a `dev` script, try:
+Or, depending on the project's scripts:
 
 ```bash
 npm start
@@ -1029,13 +1460,13 @@ The backend will typically run at:
 http://localhost:5000
 ```
 
-Check the terminal output for the exact port.
+Check terminal output for the exact port.
 
 ---
 
-## Step 14: Start the Frontend
+# STEP 14 — Start the Frontend
 
-Open another terminal:
+Open Terminal 2:
 
 ```bash
 cd frontend
@@ -1047,7 +1478,7 @@ Install dependencies if necessary:
 npm install
 ```
 
-Start the Vite development server:
+Start Vite:
 
 ```bash
 npm run dev
@@ -1063,9 +1494,7 @@ Open this address in a browser.
 
 ---
 
-# 🔐 Authentication Request Flow
-
-When a user logs in:
+# 🔐 AUTHENTICATION REQUEST FLOW
 
 ```text
 User Enters Email and Password
@@ -1074,7 +1503,7 @@ Firebase Authentication Verifies Credentials
             ↓
 Firebase Generates ID Token
             ↓
-Frontend Stores Authentication Session
+Frontend Maintains Authentication Session
             ↓
 Frontend Sends API Request
             ↓
@@ -1084,7 +1513,7 @@ Backend Authentication Middleware
             ↓
 Firebase Admin SDK Verifies Token
             ↓
-Backend Retrieves User Role
+Backend Retrieves User Profile and Role
             ↓
 RBAC Middleware Checks Permission
             ↓
@@ -1093,9 +1522,9 @@ Authorized Request Continues
 
 ---
 
-# 🗄️ Main Firestore Collections
+# 🗄️ MAIN FIRESTORE COLLECTIONS
 
-Depending on the final project version, the application may use collections such as:
+Depending on the final project implementation, the application may use collections such as:
 
 ```text
 users
@@ -1106,97 +1535,110 @@ notifications
 auditLogs
 ```
 
-### Users
+## Users
+
+Stores information such as:
+
+- Firebase UID.
+- Employee ID.
+- Name.
+- Email.
+- Department.
+- Designation.
+- Role.
+- Account status.
+- Assigned officers.
+
+## Leave Requests
 
 Stores:
 
-- Firebase UID
-- Employee ID
-- Name
-- Email
-- Department
-- Designation
-- Role
-- Account status
-- Assigned officers
+- Employee UID.
+- Leave type.
+- Start date.
+- End date.
+- Total leave days.
+- Reason.
+- Current status.
+- Reporting Officer decision.
+- Reviewing Officer decision.
+- Approving Authority decision.
+- Remarks.
+- Timestamps.
 
-### Leave Requests
+## Leave Balances
 
-Stores:
+Stores employee leave balances.
 
-- Employee UID
-- Leave type
-- Start date
-- End date
-- Number of leave days
-- Reason
-- Current status
-- Reporting Officer decision
-- Reviewing Officer decision
-- Approving Authority decision
-- Remarks
-- Timestamps
+Possible leave types include:
 
-### Leave Balances
+- Casual Leave.
+- Medical Leave.
+- Earned Leave.
+- Half Pay Leave.
+- Duty Leave.
 
-Stores available balances for supported leave types.
-
-### Holidays
+## Holidays
 
 Stores organizational holiday information.
 
-### Notifications
+## Notifications
 
-Stores system-generated notifications for users.
+Stores system-generated user notifications.
 
-### Audit Logs
+## Audit Logs
 
 Stores important actions performed within the application.
 
 ---
 
-# 🧪 Recommended Testing Procedure
+# 🧪 RECOMMENDED TESTING PROCEDURE
 
-After setup, test the application in this sequence:
+After setup, test the application in this order:
 
 1. Start the backend.
 2. Start the frontend.
-3. Login as Admin.
+3. Login as the first Admin.
 4. Verify Admin Dashboard access.
 5. Create an Employee account.
-6. Login as Employee.
-7. Verify Employee Dashboard.
-8. Submit a leave application.
-9. Login as Reporting Officer.
-10. Review the leave request.
-11. Login as Reviewing Officer.
-12. Review the forwarded request.
-13. Login as Approving Authority.
-14. Approve or reject the request.
-15. Login as Employee.
-16. Verify final status.
-17. Check leave balance.
-18. Check notifications.
-19. Check Firestore records.
-20. Verify that unauthorized users cannot access restricted modules.
+6. Create or assign a Reporting Officer.
+7. Create or assign a Reviewing Officer.
+8. Create or assign an Approving Authority.
+9. Login as Employee.
+10. Verify Employee Dashboard.
+11. Submit a leave application.
+12. Login as Reporting Officer.
+13. Review the leave application.
+14. Login as Reviewing Officer.
+15. Review the forwarded application.
+16. Login as Approving Authority.
+17. Approve or reject the application.
+18. Login again as Employee.
+19. Verify final leave status.
+20. Verify leave balance.
+21. Check notifications.
+22. Check Firestore records.
+23. Verify unauthorized users cannot access restricted modules.
 
 ---
 
-# 🧰 Troubleshooting
+# 🧰 TROUBLESHOOTING
 
 ## Error: `serviceAccountKey.json` Not Found
 
-Verify that the file exists at:
+Verify the file exists at:
 
 ```text
 backend/firebase/serviceAccountKey.json
 ```
 
-Make sure the filename matches exactly:
+Make sure the filename is exactly:
 
 ```text
 serviceAccountKey.json
 ```
+
+Also verify the import path used by your Firebase Admin configuration.
 
 ---
 
@@ -1205,16 +1647,16 @@ serviceAccountKey.json
 Check:
 
 - Email/Password authentication is enabled.
-- Firebase frontend credentials are correct.
-- The `.env` file exists.
-- All Vite variables begin with `VITE_`.
-- The frontend development server was restarted after editing `.env`.
+- Firebase frontend configuration is correct.
+- The frontend `.env` file exists.
+- Vite environment variables begin with `VITE_`.
+- The frontend development server was restarted after changing `.env`.
 
 ---
 
 ## Error: `401 Unauthorized`
 
-Possible causes:
+Possible reasons:
 
 - User is not logged in.
 - Firebase ID Token is missing.
@@ -1222,7 +1664,7 @@ Possible causes:
 - Token has expired.
 - Frontend is not sending the Authorization header.
 
-Expected format:
+Expected header:
 
 ```text
 Authorization: Bearer <firebase-id-token>
@@ -1232,27 +1674,28 @@ Authorization: Bearer <firebase-id-token>
 
 ## Error: `403 Forbidden`
 
-A `403 Forbidden` response usually means the user is authenticated but does not have permission to access the requested resource.
+This usually means the user is authenticated but does not have permission to access the requested resource.
 
 Check:
 
 - User role.
 - Firestore user profile.
 - Account status.
-- Role spelling and capitalization.
-- RBAC middleware configuration.
+- Role spelling.
+- Role capitalization.
+- RBAC middleware.
 
 ---
 
 ## Error: CORS Blocked
 
-Verify that the backend allows requests from:
+Verify that the backend allows:
 
 ```text
 http://localhost:5173
 ```
 
-Check the backend `.env`:
+Check backend `.env`:
 
 ```env
 FRONTEND_URL=http://localhost:5173
@@ -1272,7 +1715,7 @@ If the project includes:
 firestore.indexes.json
 ```
 
-deploy indexes using:
+deploy indexes:
 
 ```bash
 firebase deploy --only firestore:indexes
@@ -1284,13 +1727,13 @@ firebase deploy --only firestore:indexes
 
 Check:
 
-- Email credentials.
+- Email address.
+- App Password.
 - Environment-variable names.
-- App Password configuration.
-- Email service setup.
+- Email service configuration.
 - Backend console logs.
 
-Depending on the implementation, the main ILMS functionality may continue to work even if email notification delivery fails.
+The main ILMS functionality may continue working even if email delivery fails, depending on the project's error handling.
 
 ---
 
@@ -1301,8 +1744,8 @@ Check:
 - Backend is running.
 - Correct backend port is configured.
 - `VITE_API_BASE_URL` is correct.
-- CORS allows the frontend origin.
-- No firewall is blocking the local port.
+- CORS permits the frontend origin.
+- Firewall is not blocking the local port.
 
 Example:
 
@@ -1312,15 +1755,53 @@ VITE_API_BASE_URL=http://localhost:5000/api
 
 ---
 
-# 🔐 Security Best Practices
+## Error: Admin Cannot Login
+
+Check all of the following:
+
+1. The Admin exists in Firebase Authentication.
+2. The password is correct.
+3. A matching Admin profile exists in Firestore.
+4. The Firestore document ID matches the Firebase UID if required by the project.
+5. The Admin role exactly matches the expected role value.
+6. The Admin account is active.
+7. Firebase Authentication Email/Password login is enabled.
+
+---
+
+## Error: `npm run create-admin` Does Not Work
+
+Check:
+
+1. `backend/scripts/createAdmin.js` exists.
+2. The backend `package.json` contains:
+
+```json
+"create-admin": "node scripts/createAdmin.js"
+```
+
+3. Firebase Admin SDK is installed.
+4. `serviceAccountKey.json` exists in the expected folder.
+5. The Firebase configuration import path is correct.
+6. Backend dependencies have been installed using:
+
+```bash
+npm install
+```
+
+---
+
+# 🔐 SECURITY BEST PRACTICES
 
 Never share or upload:
 
 ```text
-.env
-serviceAccountKey.json
+frontend/.env
+backend/.env
+backend/firebase/serviceAccountKey.json
 Firebase private keys
 Email passwords
+Email App Passwords
 Production secrets
 API secrets
 ```
@@ -1333,72 +1814,18 @@ git status
 
 Verify that no sensitive files are being tracked.
 
-If a Firebase Service Account Key is accidentally exposed publicly:
+If a Firebase Service Account Key is accidentally exposed:
 
 1. Immediately revoke or delete the compromised key.
-2. Generate a new Service Account Key.
-3. Update the backend configuration.
+2. Generate a new key.
+3. Update the backend.
 4. Review Firebase and Google Cloud audit logs where applicable.
 
 ---
 
-# 📋 Quick Setup Summary
+# 🚫 FILES THAT SHOULD NOT BE SHARED
 
-Follow these steps in order:
-
-1. Install Node.js and npm.
-2. Extract the ILMS project.
-3. Open it in Visual Studio Code.
-4. Run `npm install` in the frontend.
-5. Run `npm install` in the backend.
-6. Create a Firebase project.
-7. Enable Firebase Authentication.
-8. Enable Email/Password login.
-9. Create Firestore Database.
-10. Register a Firebase Web App.
-11. Create `frontend/.env`.
-12. Generate Firebase Admin SDK Service Account Key.
-13. Add `serviceAccountKey.json` to the correct backend folder.
-14. Create `backend/.env`.
-15. Configure email credentials if email functionality is required.
-16. Deploy Firestore Security Rules.
-17. Deploy Firestore indexes if required.
-18. Create the first Admin account.
-19. Start the backend.
-20. Start the frontend.
-21. Login and test all user roles.
-
----
-
-# 💻 Quick Start Commands
-
-## Terminal 1 — Backend
-
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-## Terminal 2 — Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Open the frontend in a browser:
-
-```text
-http://localhost:5173
-```
-
----
-
-# 🚫 Files That Should Not Be Shared
-
-The following files should remain private:
+Keep these private:
 
 ```text
 frontend/.env
@@ -1411,13 +1838,70 @@ Instead, share:
 ```text
 frontend/.env.example
 backend/.env.example
+README.md
 ```
 
-This allows another developer to create their own configuration without exposing your private credentials.
+Another developer can create their own private configuration by following this README.
 
 ---
 
-# 🌟 Future Scope
+# 📋 COMPLETE SETUP CHECKLIST
+
+Before running ILMS, verify:
+
+- [ ] Node.js is installed.
+- [ ] npm is installed.
+- [ ] Frontend dependencies are installed.
+- [ ] Backend dependencies are installed.
+- [ ] Firebase project is created.
+- [ ] Firebase Authentication is enabled.
+- [ ] Email/Password authentication is enabled.
+- [ ] Firestore Database is created.
+- [ ] Firebase Web App is registered.
+- [ ] Frontend `.env` is configured.
+- [ ] Firebase Service Account Key is generated.
+- [ ] `serviceAccountKey.json` is placed in the correct backend folder.
+- [ ] Backend `.env` is configured.
+- [ ] Email service is configured if required.
+- [ ] Firestore Security Rules are configured.
+- [ ] Firestore indexes are deployed if required.
+- [ ] First Admin account is created.
+- [ ] Backend server starts successfully.
+- [ ] Frontend development server starts successfully.
+- [ ] Admin login works.
+- [ ] Employee creation works.
+- [ ] Leave workflow works.
+
+---
+
+# ⚡ QUICK START SUMMARY
+
+## Terminal 1 — Backend
+
+```bash
+cd backend
+npm install
+npm run create-admin
+npm run dev
+```
+
+## Terminal 2 — Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+---
+
+# 🌟 FUTURE SCOPE
 
 The ILMS architecture can be extended with:
 
@@ -1439,7 +1923,7 @@ The ILMS architecture can be extended with:
 
 ---
 
-# 📌 Project Information
+# 📌 PROJECT INFORMATION
 
 **Project Title:** Internal Leave Management System (ILMS)
 
@@ -1458,23 +1942,23 @@ The ILMS architecture can be extended with:
 
 **Authentication:** Firebase Authentication
 
-**Security:** Firebase ID Tokens, RBAC, Helmet, CORS, Protected APIs, Firestore Security Rules
+**Security:** Firebase ID Tokens, Role-Based Access Control, Helmet, CORS, Protected APIs, and Firestore Security Rules
 
 ---
 
-# 👨‍💻 Authors
+# 👨‍💻 AUTHORS
 
-### Suprakash Debnath
+## Suprakash Debnath
 
 Project Developer
 
-### Chayanika Debnath
+## Chayanika Debnath
 
 Project Developer
 
 ---
 
-# 📄 License and Usage
+# 📄 LICENSE AND USAGE
 
 This project was developed as part of an internship and academic software development project.
 
@@ -1482,7 +1966,7 @@ The source code, documentation, and associated materials should be used in accor
 
 ---
 
-# 🙏 Acknowledgement
+# 🙏 ACKNOWLEDGEMENT
 
 We would like to express our sincere gratitude to our internship mentor and all individuals who provided guidance, feedback, and support throughout the development of the **Internal Leave Management System (ILMS)**.
 
