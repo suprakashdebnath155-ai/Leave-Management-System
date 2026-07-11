@@ -304,4 +304,5 @@ module.exports = {
   cancelLeaveRequest,
   clearAllLeaveRequests,
   revokeExpiredLeaveRequests,
+  filterPendingForStage,
 };
